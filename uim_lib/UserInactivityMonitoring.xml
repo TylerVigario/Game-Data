@@ -1,0 +1,428 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UserInactivityMonitoring</name>
+    </assembly>
+    <members>
+        <member name="T:UserInactivityMonitoring.ApplicationMonitor">
+            <summary>
+            Class for monitoring user inactivity without plattform
+            invokes by analyzing windows messages
+            </summary>
+        </member>
+        <member name="T:UserInactivityMonitoring.MonitorBase">
+            <summary>
+            Provides the abstract base class for inactivity
+            monitors which is independent from how the
+            events are intercepted
+            </summary>
+        </member>
+        <member name="T:UserInactivityMonitoring.IInactivityMonitor">
+            <summary>
+            Defines the interface for all monitor classes in
+            <see cref="N:UserInactivityMonitoring"/>
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.IInactivityMonitor.Reset">
+            <summary>
+            Resets the internal timer and status information
+            </summary>
+        </member>
+        <member name="E:UserInactivityMonitoring.IInactivityMonitor.Elapsed">
+            <summary>
+            Occurs when the period of time defined by <see cref="P:UserInactivityMonitoring.IInactivityMonitor.Interval"/>
+            has passed without any user interaction
+            </summary>
+        </member>
+        <member name="E:UserInactivityMonitoring.IInactivityMonitor.Reactivated">
+            <summary>
+            Occurs when the user continues to interact with the system after
+            <see cref="P:UserInactivityMonitoring.IInactivityMonitor.Interval"/> has elapsed
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.IInactivityMonitor.Interval">
+            <summary>
+            Period of time without user interaction after which
+            <see cref="E:UserInactivityMonitoring.IInactivityMonitor.Elapsed"/> is raised
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.IInactivityMonitor.Enabled">
+            <summary>
+            Specifies if the instances raises events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.IInactivityMonitor.MonitorMouseEvents">
+            <summary>
+            Specifies if the instances monitors mouse events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.IInactivityMonitor.MonitorKeyboardEvents">
+            <summary>
+            Specifies if the instances monitors keyboard events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.IInactivityMonitor.SynchronizingObject">
+            <summary>
+            Object to use for synchronization (the execution of
+            event handlers will be marshalled to the thread that
+            owns the synchronization object)
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorBase.#ctor">
+            <summary>
+            Creates a new instance of <see cref="T:UserInactivityMonitoring.MonitorBase"/> which
+            includes a <see cref="T:System.Timers.Timer"/> object
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorBase.Dispose">
+            <summary>
+            Unregisters all event handlers and disposes internal objects
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorBase.Dispose(System.Boolean)">
+            <summary>
+            Actual deconstructor in accordance with the dispose pattern
+            </summary>
+            <param name="disposing">
+            True if managed and unmanaged resources will be freed
+            (otherwise only unmanaged resources are handled)
+            </param>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorBase.Finalize">
+            <summary>
+            Deconstructor method for use by the garbage collector
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorBase.Reset">
+            <summary>
+            Resets the internal timer and status information
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorBase.OnElapsed(System.Timers.ElapsedEventArgs)">
+            <summary>
+            Method to raise the <see cref="E:UserInactivityMonitoring.MonitorBase.Elapsed"/> event
+            (performs consistency checks before raising <see cref="E:UserInactivityMonitoring.MonitorBase.Elapsed"/>)
+            </summary>
+            <param name="e">
+            <see cref="T:System.Timers.ElapsedEventArgs"/> object provided by the internal timer object
+            </param>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorBase.OnReactivated(System.EventArgs)">
+            <summary>
+            Method to raise the <see cref="E:UserInactivityMonitoring.MonitorBase.Reactivated"/> event (performs
+            consistency checks before raising <see cref="E:UserInactivityMonitoring.MonitorBase.Reactivated"/>)
+            </summary>
+            <param name="e">
+            <see cref="T:System.EventArgs"/> object
+            </param>
+        </member>
+        <member name="E:UserInactivityMonitoring.MonitorBase.Elapsed">
+            <summary>
+            Occurs when the period of time defined by <see cref="P:UserInactivityMonitoring.MonitorBase.Interval"/>
+            has passed without any user interaction
+            </summary>
+        </member>
+        <member name="E:UserInactivityMonitoring.MonitorBase.Reactivated">
+            <summary>
+            Occurs when the user continues to interact with the system after
+            <see cref="P:UserInactivityMonitoring.MonitorBase.Interval"/> has elapsed
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.MonitorBase.TimeElapsed">
+            <summary>
+            True after <see cref="E:UserInactivityMonitoring.MonitorBase.Elapsed"/> has been raised until
+            <see cref="M:UserInactivityMonitoring.MonitorBase.Reset"/> is called
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.MonitorBase.ReactivatedRaised">
+            <summary>
+            True after <see cref="E:UserInactivityMonitoring.MonitorBase.Reactivated"/> has been raised until
+            <see cref="M:UserInactivityMonitoring.MonitorBase.Reset"/> is called
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.MonitorBase.Interval">
+            <summary>
+            Period of time without user interaction after which
+            <see cref="E:UserInactivityMonitoring.MonitorBase.Elapsed"/> is raised
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.MonitorBase.Enabled">
+            <summary>
+            Specifies if the instances raises events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.MonitorBase.MonitorMouseEvents">
+            <summary>
+            Specifies if the instances monitors mouse events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.MonitorBase.MonitorKeyboardEvents">
+            <summary>
+            Specifies if the instances monitors keyboard events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.MonitorBase.SynchronizingObject">
+            <summary>
+            Object to use for synchronization (the execution of
+            event handlers will be marshalled to the thread that
+            owns the synchronization object)
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.ApplicationMonitor.#ctor">
+            <summary>
+            Creates a new instance of <see cref="T:UserInactivityMonitoring.ApplicationMonitor"/>
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.ApplicationMonitor.PreFilterMessage(System.Windows.Forms.Message@)">
+            <summary>
+            Processes windows messages to detect user activity
+            </summary>
+            <param name="m">
+            <see cref="T:System.Windows.Forms.Message"/> object with the current message
+            </param>
+            <returns>
+            Always returns false to allow further processing of all messages
+            </returns>
+        </member>
+        <member name="M:UserInactivityMonitoring.ApplicationMonitor.Dispose(System.Boolean)">
+            <summary>
+            Actual deconstructor in accordance with the dispose pattern
+            </summary>
+            <param name="disposing">
+            True if managed and unmanaged resources will be freed
+            (otherwise only unmanaged resources are handled)
+            </param>
+        </member>
+        <member name="T:UserInactivityMonitoring.ControlMonitor">
+            <summary>
+            Class for monitoring user inactivity without any plattform invokes
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.ControlMonitor.#ctor(System.Windows.Forms.Control)">
+            <summary>
+            Creates a new instance of <see cref="T:UserInactivityMonitoring.ControlMonitor"/>
+            </summary>
+            <param name="target">
+            The control (including all child controls) to be monitored
+            </param>
+        </member>
+        <member name="M:UserInactivityMonitoring.ControlMonitor.Dispose(System.Boolean)">
+            <summary>
+            Actual deconstructor in accordance with the dispose pattern
+            </summary>
+            <param name="disposing">
+            True if managed and unmanaged resources will be freed
+            (otherwise only unmanaged resources are handled)
+            </param>
+        </member>
+        <member name="P:UserInactivityMonitoring.ControlMonitor.MonitorMouseEvents">
+            <summary>
+            Specifies if the instances monitors mouse events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.ControlMonitor.MonitorKeyboardEvents">
+            <summary>
+            Specifies if the instances monitors keyboard events
+            </summary>
+        </member>
+        <member name="T:UserInactivityMonitoring.HookMonitor">
+            <summary>
+            Class for monitoring user inactivity by incorporating hooks
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.HookMonitor.#ctor(System.Boolean)">
+            <summary>
+            Creates a new instance of <see cref="T:UserInactivityMonitoring.HookMonitor"/>
+            </summary>
+            <param name="global">
+            True if the system-wide activity will be monitored, otherwise only
+            events in the current thread will be monitored
+            </param>
+        </member>
+        <member name="M:UserInactivityMonitoring.HookMonitor.Finalize">
+            <summary>
+            Deconstructor method for use by the garbage collector
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.HookMonitor.Dispose(System.Boolean)">
+            <summary>
+            Actual deconstructor in accordance with the dispose pattern
+            </summary>
+            <param name="disposing">
+            True if managed and unmanaged resources will be freed
+            (otherwise only unmanaged resources are handled)
+            </param>
+        </member>
+        <member name="P:UserInactivityMonitoring.HookMonitor.MonitorMouseEvents">
+            <summary>
+            Specifies if the instances monitors mouse events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.HookMonitor.MonitorKeyboardEvents">
+            <summary>
+            Specifies if the instances monitors keyboard events
+            </summary>
+        </member>
+        <member name="T:UserInactivityMonitoring.LastInputMonitor">
+            <summary>
+            Class to detect user inactivity by polling GetLastInputInfo()
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.LastInputMonitor.#ctor">
+            <summary>
+            Creates a new instance of <see cref="T:UserInactivityMonitoring.LastInputMonitor"/>
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.LastInputMonitor.Dispose">
+            <summary>
+            Unregisters all event handlers and disposes internal objects
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.LastInputMonitor.Dispose(System.Boolean)">
+            <summary>
+            Actual deconstructor in accordance with the dispose pattern
+            </summary>
+            <param name="disposing">
+            True if managed and unmanaged resources will be freed
+            (otherwise only unmanaged resources are handled)
+            </param>
+        </member>
+        <member name="M:UserInactivityMonitoring.LastInputMonitor.Finalize">
+            <summary>
+            Deconstructor method for use by the garbage collector
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.LastInputMonitor.Reset">
+            <summary>
+            Resets the internal timer and status information
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.LastInputMonitor.OnElapsed(System.Timers.ElapsedEventArgs)">
+            <summary>
+            Method to raise the <see cref="E:UserInactivityMonitoring.LastInputMonitor.Elapsed"/> event
+            (performs consistency checks before raising <see cref="E:UserInactivityMonitoring.LastInputMonitor.Elapsed"/>)
+            </summary>
+            <param name="e">
+            <see cref="T:System.Timers.ElapsedEventArgs"/> object provided by the internal timer object
+            </param>
+        </member>
+        <member name="M:UserInactivityMonitoring.LastInputMonitor.OnReactivated(System.EventArgs)">
+            <summary>
+            Method to raise the <see cref="E:UserInactivityMonitoring.LastInputMonitor.Reactivated"/> event (performs
+            consistency checks before raising <see cref="E:UserInactivityMonitoring.LastInputMonitor.Reactivated"/>)
+            </summary>
+            <param name="e">
+            <see cref="T:System.EventArgs"/> object
+            </param>
+        </member>
+        <member name="E:UserInactivityMonitoring.LastInputMonitor.Elapsed">
+            <summary>
+            Occurs when the period of time defined by <see cref="P:UserInactivityMonitoring.LastInputMonitor.Interval"/>
+            has passed without any user interaction
+            </summary>
+        </member>
+        <member name="E:UserInactivityMonitoring.LastInputMonitor.Reactivated">
+            <summary>
+            Occurs when the user continues to interact with the system after
+            <see cref="P:UserInactivityMonitoring.LastInputMonitor.Interval"/> has elapsed
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.LastInputMonitor.Interval">
+            <summary>
+            Period of time without user interaction after which
+            <see cref="E:UserInactivityMonitoring.LastInputMonitor.Elapsed"/> is raised
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.LastInputMonitor.Enabled">
+            <summary>
+            Specifies if the instances raises events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.LastInputMonitor.MonitorMouseEvents">
+            <summary>
+            Specifies if the instances monitors mouse events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.LastInputMonitor.MonitorKeyboardEvents">
+            <summary>
+            Specifies if the instances monitors keyboard events
+            </summary>
+        </member>
+        <member name="P:UserInactivityMonitoring.LastInputMonitor.SynchronizingObject">
+            <summary>
+            Object to use for synchronization (the execution of
+            event handlers will be marshalled to the thread that
+            owns the synchronization object)
+            </summary>
+        </member>
+        <member name="T:UserInactivityMonitoring.MonitorCreator">
+            <summary>
+            Static class for creating <see cref="T:UserInactivityMonitoring.IInactivityMonitor"/> objects
+            </summary>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorCreator.CreateInstance">
+            <summary>
+            Creates a new instance of the default monitor class (global)
+            </summary>
+            <returns>Reference to the new  <see cref="T:UserInactivityMonitoring.IInactivityMonitor"/> object</returns>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorCreator.CreateInstance(UserInactivityMonitoring.MonitorType)">
+            <summary>
+            Creates a new instance of a monitor class
+            </summary>
+            <param name="type">
+            Type of the monitor to create
+            </param>
+            <returns>Reference to the new  <see cref="T:UserInactivityMonitoring.IInactivityMonitor"/> object</returns>
+        </member>
+        <member name="M:UserInactivityMonitoring.MonitorCreator.CreateInstance(System.Windows.Forms.Control,UserInactivityMonitoring.MonitorType)">
+            <summary>
+            Creates a new instance of a monitor class
+            </summary>
+            <param name="target">
+            <see cref="T:System.Windows.Forms.Control"/> to monitor (may be null if not needed and
+            is not checked by <see cref="M:UserInactivityMonitoring.MonitorCreator.CreateInstance"/> before calling the constructor)
+            </param>
+            <param name="type">
+            Type of the monitor to create
+            </param>
+            <returns>Reference to the new  <see cref="T:UserInactivityMonitoring.IInactivityMonitor"/> object</returns>
+        </member>
+        <member name="T:UserInactivityMonitoring.MonitorType">
+            <summary>
+            Defines constants to pass to <see cref="M:UserInactivityMonitoring.MonitorCreator.CreateInstance"/>
+            </summary>
+        </member>
+        <member name="F:UserInactivityMonitoring.MonitorType.ControlMonitor">
+            <summary>
+            Monitor working with the events of the <see cref="T:System.Windows.Forms.Control"/> class
+            </summary>
+        </member>
+        <member name="F:UserInactivityMonitoring.MonitorType.ApplicationMonitor">
+            <summary>
+            Monitor which implements the <see cref="M:System.Windows.Forms.IMessageFilter.PreFilterMessage(System.Windows.Forms.Message@)"/>
+            method to intercept windows messages
+            </summary>
+        </member>
+        <member name="F:UserInactivityMonitoring.MonitorType.LastInputMonitor">
+            <summary>
+            Monitor which polls the last input time
+            </summary>
+        </member>
+        <member name="F:UserInactivityMonitoring.MonitorType.ThreadHookMonitor">
+            <summary>
+            Monitor which installs the windows hooks WH_KEYBOARD and WH_MOUSE
+            </summary>
+        </member>
+        <member name="F:UserInactivityMonitoring.MonitorType.GlobalHookMonitor">
+            <summary>
+            Monitor which installs the windows hooks WH_KEYBOARD_LL and WH_MOUSE_LL
+            </summary>
+        </member>
+        <member name="F:UserInactivityMonitoring.MonitorType.DefaultMonitor">
+            <summary>
+            Global default monitor
+            </summary>
+        </member>
+    </members>
+</doc>
