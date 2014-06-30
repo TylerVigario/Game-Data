@@ -219,7 +219,8 @@ namespace Game_Data
                 game.Total_Time = game.Total_Time.Add(span);
                 if (span > game.Maximum_Session_Time) { game.Maximum_Session_Time = span; }
                 if (span < game.Minimum_Session_Time) { game.Minimum_Session_Time = span; }
-                game.Average_Session_Time = TimeSpan.FromSeconds(game.Total_Time.TotalSeconds / game.Sessions);
+                if (game.Sessions > 0) { game.Average_Session_Time = TimeSpan.FromSeconds(game.Total_Time.TotalSeconds / game.Sessions); }
+                else { game.Average_Session_Time = game.Average_Session_Time; }
                 game.Last_Session_Time = span;
                 //
                 CachedSessionsList cache = CachedSessions.Find(delegate(CachedSessionsList x) { return x.Game_Name == game_name; });

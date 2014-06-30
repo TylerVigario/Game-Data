@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 
 namespace Game_Data
 {
@@ -75,7 +75,8 @@ namespace Game_Data
                     if (localVersion >= Convert.ToInt32(available_update.version)) { return; }
                 }
                 //
-                client.DownloadFileAsync(new Uri("http://updater.logicpwn.com/download.php?app_id=3"), Settings.Save_Path + "\\games.ini");
+                client.DownloadFile(new Uri("http://updater.logicpwn.com/download.php?app_id=3"), Settings.Save_Path + "\\games.ini");
+
                 
             }
             catch (Exception ex) { if (connectedToInternet()) { Game_Data.Program.ApplicationThreadException(null, new System.Threading.ThreadExceptionEventArgs(ex)); } } 

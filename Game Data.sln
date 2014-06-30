@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game Data", "Game Data\Game Data.csproj", "{5FA00DE3-FD14-480A-93D1-BFB1D2B27EDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calendar.NET", "..\..\..\..\Desktop\CalendarNETSource\Calendar.NET\Calendar.NET.csproj", "{6CBC43B6-E950-49B2-B14A-563C50FCD5C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calendar.NET", "..\CalendarNETSource\Calendar.NET\Calendar.NET.csproj", "{6CBC43B6-E950-49B2-B14A-563C50FCD5C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

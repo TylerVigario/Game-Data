@@ -52,7 +52,7 @@ namespace Game_Data
             //
             WindowGeometry.GeometryFromString(Settings.Main_Window_Geometry, this);
             gamesList.RestoreState(Convert.FromBase64String(Settings.GamesList_State));
-            if (Settings.Start_Hidden) { HideMe(); }
+            if (Settings.Start_Hidden) { HideMe(true); }
             //
             #region ObjectListView stuff
 
@@ -142,11 +142,12 @@ namespace Game_Data
             }
         }
 
-        private void HideMe()
+        private void HideMe(bool first = false)
         {
             this.ShowInTaskbar = false;
             this.trayIcon.Visible = true;
-            this.Hide();
+            if (first) { this.WindowState = FormWindowState.Minimized; }
+            else { this.Hide(); }
         }
 
         private void closeGD(bool skip_c = false)
@@ -183,7 +184,8 @@ namespace Game_Data
         {
             this.ShowInTaskbar = true;
             trayIcon.Visible = false;
-            this.Show();
+            if (this.WindowState == FormWindowState.Minimized) { this.WindowState = FormWindowState.Normal; }
+            else { this.Show(); }
             this.BringToFront();
         }
 

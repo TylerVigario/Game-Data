@@ -29,7 +29,7 @@ namespace Game_Data
                 SMTPHost = "smtp.gmail.com",
                 Port = 587,
                 UserName = "logicpwn.crashes@gmail.com",
-                Password = "pleasedontcrash",
+                Password = "Px4XbJrPkssN",
                 EnableSSL = true
             };
             reportCrash.Send(e.Exception);

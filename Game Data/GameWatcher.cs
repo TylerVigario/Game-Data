@@ -53,8 +53,6 @@ namespace Game_Data
 
         public static void EditSupportedGame(SupportedGame oGame, SupportedGame nGame)
         {
-            SupportedGame sGame = supportedGames.Find(delegate(SupportedGame x) { return x.Process_Name.ToLower() == oGame.Process_Name; });
-            sGame = nGame;
             if (oGame.Process_Name != nGame.Process_Name)
             {
                 Process[] procs = Process.GetProcessesByName(nGame.Process_Name);

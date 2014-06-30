@@ -31,7 +31,7 @@ namespace Game_Data
             //
             sItem = s;
             this.Text = "Edit Supported Game";
-            this.addButton.Text = "Edit";
+            this.addButton.Text = "Save";
             this.textBox2.Text = s.Game_Name;
             this.comboBox1.Text = s.Process_Name;
         }
@@ -103,6 +103,14 @@ namespace Game_Data
                 {
                     if (comboBox1.FindString(proc.ToLower()) == -1) { comboBox1.Items.Add(proc); }
                 }
+            }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (String.IsNullOrEmpty(textBox2.Text))
+            {
+                textBox2.Text = comboBox1.Text;
             }
         }
     }

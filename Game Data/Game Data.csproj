@@ -279,7 +279,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Desktop\CalendarNETSource\Calendar.NET\Calendar.NET.csproj">
+    <ProjectReference Include="..\..\CalendarNETSource\Calendar.NET\Calendar.NET.csproj">
       <Project>{6cbc43b6-e950-49b2-b14a-563c50fcd5c3}</Project>
       <Name>Calendar.NET</Name>
     </ProjectReference>

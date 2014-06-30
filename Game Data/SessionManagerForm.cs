@@ -69,8 +69,11 @@ namespace Game_Data
         {
             List<SessionListItem> sessions = new List<SessionListItem>();
             List<SessionData> sessionsData = GameDatabase.LoadSessions(game);
-            foreach (SessionData session in sessionsData) { sessions.Add(new SessionListItem(session)); }
-            sessionsList.AddObjects(sessions);
+            if (sessionsData != null)
+            {
+                foreach (SessionData session in sessionsData) { sessions.Add(new SessionListItem(session)); }
+                sessionsList.AddObjects(sessions);
+            }
         }
 
         private void SessionManagerForm_FormClosing(object sender, FormClosingEventArgs e)

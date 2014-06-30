@@ -22,7 +22,7 @@ namespace Game_Data
 
         private void GameInfoForm_Load(object sender, EventArgs e)
         {
-            if (game.Sessions > 0)
+            if (game.Sessions > 1)
             {
                 installedOnLabel.Text = GameDatabase.calculateLastPlayedString(game.First_Played);
                 sessionsLabel.Text = game.Sessions.ToString();

@@ -77,6 +77,7 @@ namespace Game_Data
                     CustomEvent cEvent = new CustomEvent();
                     cEvent.Date = day.Date;
                     cEvent.EventText = game.Game;
+                    cEvent.TooltipEnabled = true;
                     cEvent.TooltipText = "Played " + game.Game + " for " + GameDatabase.calculateTimeString(game.Total_Time, false);
                     cEvent.EventLengthInHours = (float)game.Total_Time.TotalHours;
                     cEvent.Rank = i++;
