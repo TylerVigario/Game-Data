@@ -39,7 +39,7 @@ namespace Game_Data
 
         private void ExtraCalculation()
         {
-            List<SessionData> sessions = GameDatabase.LoadSessions(game.Name);
+            List<SessionData> sessions = GameDatabase.LoadGameSessions(game.Name);
             List<DateTime> datesPlayed = new List<DateTime>();
             foreach (SessionData session in sessions)
             {

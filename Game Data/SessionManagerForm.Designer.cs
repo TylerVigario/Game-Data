@@ -31,10 +31,8 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SessionManagerForm));
             this.sessionsList = new BrightIdeasSoftware.ObjectListView();
-            this.Date = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.Average_CPU_Usage = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.Average_Memory_Usage = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.Start_Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.Time_Span = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.sessionMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mergeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,60 +43,43 @@
             // 
             // sessionsList
             // 
-            this.sessionsList.AllColumns.Add(this.Date);
-            this.sessionsList.AllColumns.Add(this.Time);
-            this.sessionsList.AllColumns.Add(this.Average_CPU_Usage);
-            this.sessionsList.AllColumns.Add(this.Average_Memory_Usage);
+            this.sessionsList.AllColumns.Add(this.Start_Time);
+            this.sessionsList.AllColumns.Add(this.Time_Span);
+            this.sessionsList.CellEditUseWholeCell = false;
             this.sessionsList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.Date,
-            this.Time,
-            this.Average_CPU_Usage,
-            this.Average_Memory_Usage});
+            this.Start_Time,
+            this.Time_Span});
             this.sessionsList.ContextMenuStrip = this.sessionMenu;
+            this.sessionsList.Cursor = System.Windows.Forms.Cursors.Default;
             this.sessionsList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sessionsList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.sessionsList.FullRowSelect = true;
+            this.sessionsList.HighlightBackgroundColor = System.Drawing.Color.Empty;
+            this.sessionsList.HighlightForegroundColor = System.Drawing.Color.Empty;
             this.sessionsList.Location = new System.Drawing.Point(0, 0);
             this.sessionsList.Name = "sessionsList";
-            this.sessionsList.ShowGroups = true;
             this.sessionsList.ShowItemCountOnGroups = true;
-            this.sessionsList.Size = new System.Drawing.Size(406, 276);
+            this.sessionsList.Size = new System.Drawing.Size(242, 299);
             this.sessionsList.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.sessionsList.TabIndex = 0;
             this.sessionsList.UseCompatibleStateImageBehavior = false;
             this.sessionsList.View = System.Windows.Forms.View.Details;
-            this.sessionsList.VirtualMode = false;
             this.sessionsList.SelectionChanged += new System.EventHandler(this.sessionsList_SelectionChanged);
             // 
-            // Date
+            // Start_Time
             // 
-            this.Date.AspectName = "Date";
-            this.Date.MinimumWidth = 30;
-            this.Date.Text = "Date";
-            this.Date.Width = 110;
+            this.Start_Time.AspectName = "Start_Time";
+            this.Start_Time.MinimumWidth = 30;
+            this.Start_Time.Text = "Date";
+            this.Start_Time.Width = 117;
             // 
-            // Time
+            // Time_Span
             // 
-            this.Time.AspectName = "Time";
-            this.Time.Groupable = false;
-            this.Time.MinimumWidth = 30;
-            this.Time.Text = "Time";
-            this.Time.Width = 110;
-            // 
-            // Average_CPU_Usage
-            // 
-            this.Average_CPU_Usage.AspectName = "Average_CPU_Usage";
-            this.Average_CPU_Usage.Groupable = false;
-            this.Average_CPU_Usage.Text = "Average CPU Usage";
-            this.Average_CPU_Usage.Width = 58;
-            // 
-            // Average_Memory_Usage
-            // 
-            this.Average_Memory_Usage.AspectName = "Average_Memory_Usage";
-            this.Average_Memory_Usage.Groupable = false;
-            this.Average_Memory_Usage.MinimumWidth = 30;
-            this.Average_Memory_Usage.Text = "Average Memory Usage";
-            this.Average_Memory_Usage.Width = 120;
+            this.Time_Span.AspectName = "Time_Span";
+            this.Time_Span.Groupable = false;
+            this.Time_Span.MinimumWidth = 30;
+            this.Time_Span.Text = "Time";
+            this.Time_Span.Width = 119;
             // 
             // sessionMenu
             // 
@@ -136,8 +117,9 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(406, 276);
+            this.ClientSize = new System.Drawing.Size(242, 299);
             this.Controls.Add(this.sessionsList);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SessionManagerForm";
             this.Text = "Session Manager";
@@ -152,10 +134,8 @@
         #endregion
 
         private BrightIdeasSoftware.ObjectListView sessionsList;
-        private BrightIdeasSoftware.OLVColumn Date;
-        private BrightIdeasSoftware.OLVColumn Time;
-        private BrightIdeasSoftware.OLVColumn Average_Memory_Usage;
-        private BrightIdeasSoftware.OLVColumn Average_CPU_Usage;
+        private BrightIdeasSoftware.OLVColumn Start_Time;
+        private BrightIdeasSoftware.OLVColumn Time_Span;
         private System.Windows.Forms.ContextMenuStrip sessionMenu;
         private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mergeToolStripMenuItem;

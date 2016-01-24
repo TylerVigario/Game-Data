@@ -29,19 +29,9 @@ namespace Game_Data
             open = false;
         }
 
-        private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            System.Diagnostics.Process.Start("http://objectlistview.sourceforge.net");
-        }
-
-        private void linkLabel3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            System.Diagnostics.Process.Start("http://crashreporterdotnet.codeplex.com/");
-        }
-
         private void linkLabel1_LinkClicked_1(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://logicpwn.com");
+            System.Diagnostics.Process.Start("http://logicpwn.pcriot.com");
         }
     }
 }

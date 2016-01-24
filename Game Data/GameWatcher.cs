@@ -2,15 +2,19 @@
 using System.Diagnostics;
 using System.IO;
 using System.Management;
+using IniParser;
+using IniParser.Model;
+using System;
 
 namespace Game_Data
 {
-    public delegate void gameChangedHandler(string game_name, string process_name);
+    public delegate void gameStartedD(SupportedGame game, DateTime time);
+    public delegate void gameClosedD(SupportedGame game);
 
     public class GameWatcher
     {
-        public static event gameChangedHandler gameStarted;
-        public static event gameChangedHandler gameClosed;
+        public static event gameStartedD gameStarted;
+        public static event gameClosedD gameClosed;
         //
         private static List<SupportedGame> supportedGames = new List<SupportedGame>();
         //
@@ -18,11 +22,14 @@ namespace Game_Data
 
         public GameWatcher()
         {
-            IniFile ini = new IniFile(Settings.Save_Path + "\\games.ini");
-            string[] sections = ini.GetSectionNames();
-            foreach (string section in sections)
+            var parser = new FileIniDataParser();
+            IniData ini = parser.ReadFile(Settings.Save_Path + "\\games.ini");
+            foreach (SectionData section in ini.Sections)
             {
-                supportedGames.Add(new SupportedGame(ini.GetString(section, "Game_Name", ""), ini.GetString(section, "Process_Name", "")));
+                if (section.SectionName != "General")
+                {
+                    supportedGames.Add(new SupportedGame(section.Keys["Game_Name"], section.Keys["Process_Name"]));
+                }
             }
             //
             processWatcher = new ManagementEventWatcher(@"SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_Process'");
@@ -37,7 +44,7 @@ namespace Game_Data
             Process[] procs = Process.GetProcessesByName(nGame.Process_Name);
             if (procs.Length > 0)
             {
-                if (gameStarted != null) { gameStarted(nGame.Game_Name, procs[0].ProcessName); }
+                gameStarted(nGame, procs[0].StartTime);
             }
         }
 
@@ -47,18 +54,20 @@ namespace Game_Data
             Process[] procs = Process.GetProcessesByName(nGame.Process_Name);
             if (procs.Length > 0)
             {
-                if (gameClosed != null) { gameClosed(nGame.Game_Name, nGame.Process_Name); }
+                gameClosed(nGame);
             }
         }
 
         public static void EditSupportedGame(SupportedGame oGame, SupportedGame nGame)
         {
+            supportedGames.Remove(oGame);
+            supportedGames.Add(nGame);
             if (oGame.Process_Name != nGame.Process_Name)
             {
                 Process[] procs = Process.GetProcessesByName(nGame.Process_Name);
                 if (procs.Length > 0)
                 {
-                    if (gameStarted != null) { gameStarted(nGame.Game_Name, procs[0].ProcessName); }
+                    gameStarted(nGame, procs[0].StartTime);
                 }
             }
         }
@@ -72,7 +81,7 @@ namespace Game_Data
                 SupportedGame sGame = supportedGames.Find(delegate(SupportedGame x) { return x.Process_Name.ToLower() == proc.ProcessName.ToLower(); });
                 if (sGame != null)
                 {
-                    if (gameStarted != null) { gameStarted(sGame.Game_Name, proc.ProcessName); }
+                    gameStarted(sGame, proc.StartTime);
                 }
             }
             //
@@ -101,16 +110,25 @@ namespace Game_Data
                 switch (mbo.ClassPath.ClassName)
                 {
                     case "__InstanceCreationEvent":
-                        if (gameStarted != null) { gameStarted(game.Game_Name, process_name); } break;
+                        {
+                            if (gameStarted != null)
+                            {
+                                gameStarted(game, DateTime.Now);
+                            }
+                            break;
+                        }
                     case "__InstanceDeletionEvent":
-                        if (gameClosed != null) { gameClosed(game.Game_Name, process_name); } break;
+                        {
+                            if (gameClosed != null)
+                            {
+                                gameClosed(game);
+                            }
+                            break;
+                        }
                 }
             }
             obj.Dispose();
             mbo.Dispose();
-            game = null;
-            process_name = null;
-            System.GC.Collect();
         }
     }
 

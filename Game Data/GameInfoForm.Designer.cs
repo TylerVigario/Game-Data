@@ -271,6 +271,7 @@
             this.ClientSize = new System.Drawing.Size(518, 159);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GameInfoForm";
             this.Text = "Game Info";

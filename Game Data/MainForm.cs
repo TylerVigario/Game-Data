@@ -4,26 +4,18 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
-using Thoughtful_Coding;
 
 namespace Game_Data
 {
     public partial class MainForm : Form
     {
         Mutex appMutex;
-        //
-        private delegate void gameChangedD(string game_name, string process_name);
-        //
         AboutForm about_form;
         SettingsForm settings_form;
         SupportedGamesForm supported_games_form;
         List<WeeklyAveragesForm> game_stats_form = new List<WeeklyAveragesForm>();
         List<SessionManagerForm> session_manager_form = new List<SessionManagerForm>();
         List<GameInfoForm> game_info_form = new List<GameInfoForm>();
-        //
-        GameWatcher gameWatch;
-        UpdaterForm selfUpdater;
-        CalendarReport calendar_report;
         //
         List<string> messagePump = new List<string>();
 
@@ -56,38 +48,33 @@ namespace Game_Data
             //
             #region ObjectListView stuff
 
-            TextOverlay textOverlay = this.gamesList.EmptyListMsgOverlay as TextOverlay;
-            textOverlay.TextColor = Color.SteelBlue;
-            textOverlay.BackColor = Color.WhiteSmoke;
-            textOverlay.BorderColor = Color.DarkGray;
-            textOverlay.Font = new Font("Tahoma", 26);
-            gamesList.EmptyListMsg = "No sessions recorded";
-            //
             gamesList.RestoreState(Convert.FromBase64String(Settings.GamesList_State));
             //
-            this.Last_Played.AspectToStringConverter = delegate(object x)
+            this.Last_Played.AspectToStringConverter = delegate (object x)
             {
                 DateTime last = (DateTime)x;
                 if (last > DateTime.Now) { return "Right Now"; }
                 else { return GameDatabase.calculateLastPlayedString(last); }
             };
-            this.Total_Time.AspectToStringConverter = delegate(object x)
+            this.Total_Time.AspectToStringConverter = delegate (object x)
             {
                 return GameDatabase.calculateTimeString((TimeSpan)x);
             };
-            this.Maximum_Session_Time.AspectToStringConverter = delegate(object x)
+            this.Maximum_Session_Time.AspectToStringConverter = delegate (object x)
             {
                 return GameDatabase.calculateTimeString((TimeSpan)x);
             };
-            this.Minimum_Session_Time.AspectToStringConverter = delegate(object x)
+            this.Minimum_Session_Time.AspectToStringConverter = delegate (object x)
+            {
+                TimeSpan span = (TimeSpan)x;
+                if (span == TimeSpan.MaxValue) { return "0s"; }
+                return GameDatabase.calculateTimeString(span);
+            };
+            this.Average_Session_Time.AspectToStringConverter = delegate (object x)
             {
                 return GameDatabase.calculateTimeString((TimeSpan)x);
             };
-            this.Average_Session_Time.AspectToStringConverter = delegate(object x)
-            {
-                return GameDatabase.calculateTimeString((TimeSpan)x);
-            };
-            this.Last_Session_Time.AspectToStringConverter = delegate(object x)
+            this.Last_Session_Time.AspectToStringConverter = delegate (object x)
             {
                 return GameDatabase.calculateTimeString((TimeSpan)x);
             };
@@ -97,36 +84,14 @@ namespace Game_Data
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            selfUpdater = new UpdaterForm(1);
-            if (Settings.Update_Check_Interval > 0)
-            {
-                updateChecker.Interval = Settings.Update_Check_Interval * 60000;
-                updateChecker.Enabled = true;
-            }
-            if (Settings.Update_Check_On_Startup)
-            {
-                selfUpdater.checkForUpdate();
-                SupportedGamesForm.checkForUpdate();
-            }
-            //
             GameDatabase.Loaded += GameDatabase_Loaded;
-            GameDatabase.RefreshGame += GameDatabase_RefreshGame;
-            GameDatabase.FullRefresh += GameDatabase_FullRefresh;
+            GameDatabase.GameStarted += GameDatabase_GameStarted;
+            GameDatabase.GameClosed += GameDatabase_GameClosed;
+            GameDatabase.GameRemoved += GameDatabase_GameRemoved;
+            GameDatabase.GameRenamed += GameDatabase_GameRenamed;
+            GameDatabase.SessionAdded += GameDatabase_SessionAdded;
+            GameDatabase.SessionRemoved += GameDatabase_SessionRemoved;
             GameDatabase.Load();
-        }
-
-        void GameDatabase_Loaded()
-        {
-            GameDatabase.Loaded -= GameDatabase_Loaded;
-            gamesList.SetObjects(GameDatabase.GamesData);
-            //
-            gameWatch = new GameWatcher(); // Multi thread
-            GameWatcher.gameStarted += gameWatch_gameStarted;
-            GameWatcher.gameClosed += gameWatch_gameClosed;
-            gameWatch.Start(); // Multi thread
-            //
-            nextDay.Interval = (int)(DateTime.Today.AddDays(1) - DateTime.Now).TotalMilliseconds;
-            nextDay.Enabled = true;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -156,12 +121,11 @@ namespace Game_Data
             {
                 Settings.Main_Window_Geometry = WindowGeometry.GeometryToString(this);
                 Settings.GamesList_State = Convert.ToBase64String(gamesList.SaveState());
-                gameWatch.Stop();
-                //
+                Settings.Dispose();
+                GameDatabase.Dispose();
                 appMutex.WaitOne();
                 appMutex.ReleaseMutex();
                 appMutex.Dispose();
-                gameWatch.Dispose();
                 trayIcon.Dispose();
                 Environment.Exit(0);
             }
@@ -206,43 +170,87 @@ namespace Game_Data
 
         #endregion
 
-        #region GameWatcher
+        #region GameDatabase events
 
-        void gameWatch_gameStarted(string game_name, string process_name)
+        void GameDatabase_Loaded(List<GameData> games)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new gameChangedD(gameWatch_gameStarted), new object[] { game_name, process_name });
+                BeginInvoke(new LoadedD(GameDatabase_Loaded), new object[] { games });
                 return;
             }
-            //
-            if (GameDatabase.GameStarted(game_name))
+            gamesList.SetObjects(games);
+        }
+
+        private void GameDatabase_GameStarted(GameData game, DateTime time)
+        {
+            if (InvokeRequired)
             {
-                displayStatus(game_name + " (" + process_name + ") has been added.", 5);
+                BeginInvoke(new GameStartedD(GameDatabase_GameStarted), new object[] { game, time });
+                return;
+            }
+            gamesList.SelectObject(game);
+            if (gamesList.SelectedObject != null) { gamesList.RefreshObject(game); }
+            else { gamesList.AddObject(game); }
+            if (time.AddMinutes(1) > DateTime.Now)
+            {
+                displayStatus(game.Name + " has started.", 5);
             }
             else
             {
-                displayStatus(game_name + " (" + process_name + ") has started.", 5);
+                displayStatus(game.Name + " started at " + time.ToShortTimeString() + '.', 5);
             }
-            //
-            GameDataCollector.watchGame(game_name, process_name);
         }
 
-        void gameWatch_gameClosed(string game_name, string process_name)
+        private void GameDatabase_GameClosed(GameData game, SessionData session)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new gameChangedD(gameWatch_gameClosed), new object[] { game_name, process_name });
+                BeginInvoke(new SessionD(GameDatabase_GameClosed), new object[] { game, session });
                 return;
             }
-            //
-            RunningSession session = GameDataCollector.stopWatchingGame(process_name);
-            SessionData sData = GameDatabase.AddRecordedSession(game_name, session);
-            foreach (SessionManagerForm form in session_manager_form)
+            displayStatus(game.Name + " has been closed after " + GameDatabase.calculateTimeString(game.Last_Session_Time, false) + '.', 5);
+        }
+
+        private void GameDatabase_GameRemoved(GameData game)
+        {
+            if (InvokeRequired)
             {
-                if (form.Game_Loaded == game_name) { form.session_added(sData); }
+                BeginInvoke(new GameRemovedD(GameDatabase_GameRemoved), new object[] { game });
+                return;
             }
-            displayStatus(game_name + " (" + process_name + ") has been closed.", 5);
+            gamesList.RemoveObject(game);
+        }
+
+        private void GameDatabase_GameRenamed(GameData old_, GameData new_)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new GameRenamedD(GameDatabase_GameRenamed), new object[] { old_, new_ });
+                return;
+            }
+            gamesList.RemoveObject(old_);
+            gamesList.AddObject(new_);
+        }
+
+        private void GameDatabase_SessionAdded(GameData game, SessionData session)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new SessionD(GameDatabase_SessionAdded), new object[] { game, session });
+                return;
+            }
+            gamesList.RefreshObject(game);
+        }
+
+        private void GameDatabase_SessionRemoved(GameData game, SessionData session)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new SessionD(GameDatabase_SessionRemoved), new object[] { game, session });
+                return;
+            }
+            gamesList.RefreshObject(game);
         }
 
         #endregion
@@ -253,7 +261,6 @@ namespace Game_Data
         {
             if (!statusClear.Enabled)
             {
-                statusClear.Enabled = false;
                 statusLabel.Text = text;
                 if (timeout > 0)
                 {
@@ -323,25 +330,6 @@ namespace Game_Data
             }
         }
 
-        private void calendarToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (CalendarReport.isOpen)
-            {
-                calendar_report.BringToFront();
-            }
-            else
-            {
-                calendar_report = new CalendarReport();
-                calendar_report.FormClosed += calendar_report_FormClosed;
-                calendar_report.Show();
-            }
-        }
-
-        void calendar_report_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            calendar_report.Dispose();
-        }
-
         void supported_games_form_FormClosed(object sender, FormClosedEventArgs e)
         {
             supported_games_form.Dispose();
@@ -350,11 +338,6 @@ namespace Game_Data
         void settings_form_FormClosed(object sender, FormClosedEventArgs e)
         {
             settings_form.Dispose();
-            //
-            int temp = Settings.Update_Check_Interval * 60000;
-            if (temp != updateChecker.Interval) { updateChecker.Interval = temp; }
-            temp = Settings.Collection_Resolution * 1000;
-            if (temp != GameDataCollector.Collection_Res) { GameDataCollector.Collection_Change(); }
         }
 
         private void about_form_FormClosed(object sender, FormClosedEventArgs e)
@@ -449,7 +432,7 @@ namespace Game_Data
                 }
                 if (!handled)
                 {
-                    WeeklyAveragesForm temp = new WeeklyAveragesForm(GameDatabase.GamesData.Find(delegate(GameData g) { return g.Name.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower(); }));
+                    WeeklyAveragesForm temp = new WeeklyAveragesForm(GameDatabase.GamesData.Find(delegate (GameData g) { return g.Name.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower(); }));
                     temp.FormClosing += GameStats_FormClosing;
                     game_stats_form.Add(temp);
                     temp.Show();
@@ -495,7 +478,7 @@ namespace Game_Data
                 }
                 if (!handled)
                 {
-                    GameInfoForm temp = new GameInfoForm(GameDatabase.GamesData.Find(delegate(GameData g) { return g.Name.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower(); }));
+                    GameInfoForm temp = new GameInfoForm(GameDatabase.GamesData.Find(delegate (GameData g) { return g.Name.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower(); }));
                     temp.FormClosing += GameInfo_FormClosing;
                     game_info_form.Add(temp);
                     temp.Show();
@@ -507,37 +490,6 @@ namespace Game_Data
         {
             GameInfoForm form = sender as GameInfoForm;
             game_info_form.Remove(form);
-        }
-
-        #endregion
-
-        #region Events
-
-        void GameDatabase_FullRefresh()
-        {
-            gamesList.BuildList(true);
-        }
-
-        void GameDatabase_RefreshGame(GameData game)
-        {
-            gamesList.RefreshObject(game);
-        }
-
-        #endregion
-
-        #region Timers
-
-        private void nextDay_Tick(object sender, EventArgs e)
-        {
-            System.Threading.Thread.Sleep(10000);
-            nextDay.Interval = (int)(DateTime.Today.AddDays(1) - DateTime.Now).TotalMilliseconds;
-            gamesList.BuildList(true);
-        }
-
-        private void updateChecker_Tick(object sender, EventArgs e)
-        {
-            selfUpdater.checkForUpdate();
-            SupportedGamesForm.checkForUpdate();
         }
 
         #endregion

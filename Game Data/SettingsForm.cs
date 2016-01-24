@@ -31,10 +31,7 @@ namespace Game_Data
             checkBox2.Checked = Settings.Start_Hidden;
             checkBox3.Checked = Settings.Exit_Confrimation;
             checkBox4.Checked = Settings.Close_To_Tray;
-            checkBox6.Checked = Settings.Update_Check_On_Startup;
             numericUpDown1.Value = (decimal)Settings.Session_Threshold;
-            numericUpDown2.Value = (decimal)Settings.Collection_Resolution;
-            numericUpDown3.Value = (decimal)Settings.Update_Check_Interval;
             //
             switch (Settings.Time_Display_Level)
             {
@@ -71,12 +68,9 @@ namespace Game_Data
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             Settings.Session_Threshold = (int)numericUpDown1.Value;
-            Settings.Collection_Resolution = (int)numericUpDown2.Value;
-            Settings.Update_Check_Interval = (int)numericUpDown3.Value;
             Settings.Start_Hidden = checkBox2.Checked;
             Settings.Exit_Confrimation = checkBox3.Checked;
             Settings.Close_To_Tray = checkBox4.Checked;
-            Settings.Update_Check_On_Startup = checkBox6.Checked;
             //
             if (radioButton1.Checked) { Settings.Time_Display_Level = 3; }
             else if (radioButton2.Checked) { Settings.Time_Display_Level = 2; }

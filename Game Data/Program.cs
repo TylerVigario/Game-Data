@@ -14,25 +14,31 @@ namespace Game_Data
         static void Main()
         {
             Application.ThreadException += ApplicationThreadException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             //
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
         }
 
-        public static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
+        private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            ReportCrash((Exception)unhandledExceptionEventArgs.ExceptionObject);
+            Environment.Exit(0);
+        }
+
+        private static void ApplicationThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            ReportCrash(e.Exception);
+        }
+
+        private static void ReportCrash(Exception exception)
         {
             var reportCrash = new ReportCrash
             {
-                FromEmail = "TylerVigario90@gmail.com",
-                ToEmail = "logicpwn.crashes@gmail.com",
-                SMTPHost = "smtp.gmail.com",
-                Port = 587,
-                UserName = "logicpwn.crashes@gmail.com",
-                Password = "Px4XbJrPkssN",
-                EnableSSL = true
+                ToEmail = "TylerVigario90@gmail.com"
             };
-            reportCrash.Send(e.Exception);
+            reportCrash.Send(exception);
         }
     }
 }

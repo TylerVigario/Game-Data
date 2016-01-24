@@ -157,6 +157,7 @@
             this.Controls.Add(this.hoursBox);
             this.Controls.Add(this.modeComboBox);
             this.Controls.Add(this.startButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimumSize = new System.Drawing.Size(275, 141);

@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Windows.Forms;
+using IniParser;
+using IniParser.Model;
 
 namespace Game_Data
 {
-    public delegate void addGameHandler(SupportedGame s, SupportedGameListItem oldItem);
+    public delegate void addGameHandler(SupportedGame s, SupportedGame oldItem);
 
     public partial class AddSupportedGameForm : Form
     {
         private static bool open = false;
         //
-        private SupportedGameListItem sItem;
+        private SupportedGame sItem;
         //
         public event addGameHandler addGame;
         //
@@ -23,7 +24,7 @@ namespace Game_Data
             InitializeComponent();
         }
 
-        public AddSupportedGameForm(SupportedGameListItem s)
+        public AddSupportedGameForm(SupportedGame s)
         {
             open = true;
             //
@@ -54,9 +55,12 @@ namespace Game_Data
             string process_name = comboBox1.Text.Trim().ToLower();
             string section_name = GameDatabase.gameNameSaferizer(game_name);
             //
-            IniFile ini = new IniFile(Application.StartupPath + "\\games.ini");
-            ini.WriteValue(section_name, "Process_Name", process_name);
-            ini.WriteValue(section_name, "Game_Name", game_name);
+            var parser = new FileIniDataParser();
+            IniData ini = parser.ReadFile(Application.StartupPath + "\\games.ini");
+            ini.Sections.AddSection(section_name);
+            ini[section_name].AddKey("Process_Name", process_name);
+            ini[section_name].AddKey("Game_Name", game_name);
+            parser.WriteFile(Application.StartupPath + "\\games.ini", ini);
             //
             SupportedGame nGame = new SupportedGame(game_name, process_name);
             addGame(nGame, sItem);
@@ -73,11 +77,11 @@ namespace Game_Data
 
         private void AddSupportedGameForm_Load(object sender, EventArgs e)
         {
-            IniFile ini = new IniFile(Settings.Save_Path + "\\games.ini");
-            string[] sections = ini.GetSectionNames();
-            foreach (string section in sections)
+            var parser = new FileIniDataParser();
+            IniData ini = parser.ReadFile(Application.StartupPath + "\\games.ini");
+            foreach (SectionData section in ini.Sections)
             {
-                supportedProcs.Add(ini.GetString(section, "Process_Name", ""));
+                supportedProcs.Add(section.Keys["Process_Name"]);
             }
         }
 
@@ -108,10 +112,7 @@ namespace Game_Data
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (String.IsNullOrEmpty(textBox2.Text))
-            {
-                textBox2.Text = comboBox1.Text;
-            }
+            textBox2.Text = comboBox1.Text;
         }
     }
 }

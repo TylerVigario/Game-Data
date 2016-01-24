@@ -87,12 +87,16 @@
             this.supportedGamesList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.supportedGamesList.CellEditUseWholeCell = false;
             this.supportedGamesList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.Game_Name,
             this.Process_Name});
             this.supportedGamesList.ContextMenuStrip = this.supportedGamesMenu;
+            this.supportedGamesList.Cursor = System.Windows.Forms.Cursors.Default;
             this.supportedGamesList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.supportedGamesList.FullRowSelect = true;
+            this.supportedGamesList.HighlightBackgroundColor = System.Drawing.Color.Empty;
+            this.supportedGamesList.HighlightForegroundColor = System.Drawing.Color.Empty;
             this.supportedGamesList.Location = new System.Drawing.Point(12, 12);
             this.supportedGamesList.Name = "supportedGamesList";
             this.supportedGamesList.ShowGroups = false;
@@ -161,6 +165,7 @@
             this.Controls.Add(this.editButton);
             this.Controls.Add(this.removeButton);
             this.Controls.Add(this.addButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SupportedGamesForm";
             this.Text = "Supported Games Editor";

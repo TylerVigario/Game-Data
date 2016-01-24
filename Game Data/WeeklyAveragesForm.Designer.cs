@@ -124,6 +124,7 @@
             this.ClientSize = new System.Drawing.Size(730, 280);
             this.Controls.Add(this.sessionsADay);
             this.Controls.Add(this.GameName);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "WeeklyAveragesForm";
             this.Text = "Weekly Averages";

@@ -40,7 +40,7 @@ namespace Game_Data
             double[] mod = new double[7];
             //
             List<int> weeksCounted = new List<int>();
-            foreach (SessionData sData in GameDatabase.LoadSessions(game))
+            foreach (SessionData sData in GameDatabase.LoadGameSessions(game))
             {
                 int weekNumber = GetWeekNumber(sData.Start_Time);
                 if (!weeksCounted.Contains(weekNumber)) { weeksCounted.Add(weekNumber); }
