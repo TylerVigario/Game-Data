@@ -1,8 +1,8 @@
-﻿using System;
+﻿using IniParser;
+using IniParser.Model;
+using System;
 using System.IO;
 using System.Windows.Forms;
-using IniParser;
-using IniParser.Model;
 
 namespace Game_Data
 {

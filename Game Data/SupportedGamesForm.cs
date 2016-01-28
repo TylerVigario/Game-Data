@@ -1,10 +1,7 @@
-﻿using CrashReporterDotNET;
-using IniParser;
+﻿using IniParser;
 using IniParser.Model;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Net;
 using System.Windows.Forms;
 
 namespace Game_Data
@@ -12,17 +9,8 @@ namespace Game_Data
     public partial class SupportedGamesForm : Form
     {
         private static bool open = false;
-        //
+        private int nextID = 0;
         AddSupportedGameForm addForm;
-
-        private static void ReportCrash(Exception exception)
-        {
-            var reportCrash = new ReportCrash
-            {
-                ToEmail = "TylerVigario90@gmail.com"
-            };
-            reportCrash.Send(exception);
-        }
 
         public SupportedGamesForm()
         {
@@ -52,24 +40,14 @@ namespace Game_Data
             foreach (SectionData section in ini.Sections)
             {
                 if (section.SectionName != "General")
-                    SupportedGames.Add(new SupportedGame(section.Keys["Game_Name"], section.Keys["Process_Name"]));
-            }
-            supportedGamesList.AddObjects(SupportedGames);
-        }
-
-        private static bool connectedToInternet()
-        {
-            try
-            {
-                IPAddress[] addresslist = Dns.GetHostAddresses("http://www.google.com");
-                //
-                if (addresslist[0].ToString().Length > 6)
                 {
-                    return true;
+                    SupportedGames.Add(new SupportedGame(section.SectionName, section.Keys["Game_Name"], section.Keys["Process_Name"]));
+                    int temp = int.Parse(section.SectionName);
+                    if (temp > nextID) { nextID = temp; }
                 }
-                else { return false; }
             }
-            catch { return false; }
+            nextID++;
+            supportedGamesList.AddObjects(SupportedGames);
         }
 
         private void SupportedGamesForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -91,9 +69,9 @@ namespace Game_Data
                 IniData ini = parser.ReadFile(Settings.Save_Path + "\\games.ini");
                 foreach (SupportedGame item in supportedGamesList.SelectedObjects)
                 {
-                    ini.Sections.RemoveSection(GameDatabase.gameNameSaferizer(item.Game_Name));
                     supportedGamesList.RemoveObject(item);
-                    GameWatcher.RemoveSupportedGame(new SupportedGame(item.Game_Name, item.Process_Name));
+                    ini.Sections.RemoveSection(item.ID);
+                    GameWatcher.RemoveSupportedGame(item);
                 }
                 parser.WriteFile(Settings.Save_Path + "\\games.ini", ini);
             }
@@ -107,48 +85,49 @@ namespace Game_Data
             }
             else
             {
-                addForm = new AddSupportedGameForm();
+                addForm = new AddSupportedGameForm(nextID++);
                 addForm.addGame += addForm_addGame;
                 addForm.Show();
             }
         }
 
-        void addForm_addGame(SupportedGame nGame, SupportedGame oItem)
-        {
-            if (oItem != null)
-            {
-                var parser = new FileIniDataParser();
-                IniData ini = parser.ReadFile(Settings.Save_Path + "\\games.ini");
-                string new_section = GameDatabase.gameNameSaferizer(nGame.Game_Name);
-                ini.Sections.AddSection(new_section);
-                ini[new_section].AddKey("Game_Name", nGame.Game_Name);
-                ini[new_section].AddKey("Process_Name", nGame.Process_Name);
-                ini.Sections.RemoveSection(GameDatabase.gameNameSaferizer(oItem.Game_Name));
-                parser.WriteFile(Settings.Save_Path + "\\games.ini", ini);
-                //
-                GameDatabase.RenameGame(oItem, nGame);
-                supportedGamesList.UpdateObject(nGame);
-            }
-            //
-            supportedGamesList.AddObject(new SupportedGame(nGame.Game_Name, nGame.Process_Name));
-            //
-            try
-            {
-                NameValueCollection data = new NameValueCollection();
-                data.Add("Game_Name", nGame.Game_Name);
-                data.Add("Process_Name", nGame.Process_Name);
-                new WebClient().UploadValues(new Uri("http://updater.logicpwn.com/addGame.php"), data);
-            }
-            catch (Exception ex) { if (connectedToInternet()) { ReportCrash(ex); } } 
-        }
-
         private void editButton_Click(object sender, EventArgs e)
         {
-            if (supportedGamesList.SelectedObjects.Count > 1) { MessageBox.Show("You can not edit multiple items."); return; }
             SupportedGame item = (SupportedGame)supportedGamesList.SelectedObject;
-            AddSupportedGameForm addForm = new AddSupportedGameForm(item);
-            addForm.addGame += addForm_addGame;
-            addForm.Show();
+            if (AddSupportedGameForm.isOpen)
+            {
+                addForm.BringToFront();
+            }
+            else
+            {
+                addForm = new AddSupportedGameForm(item);
+                addForm.addGame += addForm_addGame;
+                addForm.Show();
+            }
+        }
+
+        void addForm_addGame(SupportedGame nGame, SupportedGame oGame)
+        {
+            var parser = new FileIniDataParser();
+            IniData ini = parser.ReadFile(Application.StartupPath + "\\games.ini");
+            if (oGame == null)
+            {
+                supportedGamesList.AddObject(nGame);
+                GameWatcher.AddSupportedGame(nGame);
+                ini.Sections.AddSection(nGame.ID);
+                ini[nGame.ID].AddKey("Process_Name", nGame.Process_Name);
+                ini[nGame.ID].AddKey("Game_Name", nGame.Game_Name);
+            }
+            else
+            {
+                supportedGamesList.RemoveObject(oGame);
+                supportedGamesList.AddObject(nGame);
+                ini[nGame.ID]["Process_Name"] = nGame.Process_Name;
+                ini[nGame.ID]["Game_Name"] = nGame.Game_Name;
+                if (nGame.Game_Name != oGame.Game_Name) { GameDatabase.RenameGame(oGame, nGame); }
+                GameWatcher.EditSupportedGame(oGame, nGame);
+            }
+            parser.WriteFile(Application.StartupPath + "\\games.ini", ini);
         }
 
         private void editToolStripMenuItem_Click(object sender, EventArgs e)
@@ -171,9 +150,17 @@ namespace Game_Data
             if (supportedGamesList.SelectedObjects.Count > 0)
             {
                 removeButton.Enabled = true;
-                editButton.Enabled = true;
                 removeToolStripMenuItem.Enabled = true;
-                editToolStripMenuItem.Enabled = true;
+                if (supportedGamesList.SelectedObjects.Count > 1)
+                {
+                    editButton.Enabled = false;
+                    editToolStripMenuItem.Enabled = false;
+                }
+                else
+                {
+                    editButton.Enabled = true;
+                    editToolStripMenuItem.Enabled = true;
+                }
             }
             else
             {
@@ -184,4 +171,28 @@ namespace Game_Data
             }
         }
     }
+
+    #region Supported Game
+
+    public class SupportedGame
+    {
+        private string _id;
+        private string _game_name;
+        private string _process_name;
+
+        public SupportedGame(string id_, string g_n, string p_n)
+        {
+            _id = id_;
+            _game_name = g_n;
+            _process_name = p_n;
+        }
+
+        public string ID {  get { return _id; } }
+
+        public string Game_Name { get { return _game_name; } }
+
+        public string Process_Name { get { return _process_name; } }
+    }
+
+    #endregion
 }

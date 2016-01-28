@@ -44,12 +44,8 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.topMenu = new System.Windows.Forms.MenuStrip();
             this.reportsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.averagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.monthlyAveragesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.weeklyAveragesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.supportedGamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.counterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,7 +60,7 @@
             this.Maximum_Session_Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.Minimum_Session_Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.Average_Session_Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.gamesListPrinter = new BrightIdeasSoftware.ListViewPrinter();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.gameMenu.SuspendLayout();
             this.trayMenu.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -108,7 +104,7 @@
             this.trayIcon.ContextMenuStrip = this.trayMenu;
             this.trayIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("trayIcon.Icon")));
             this.trayIcon.Text = "Game Data";
-            this.trayIcon.DoubleClick += new System.EventHandler(this.trayIcon_DoubleClick);
+            this.trayIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.trayIcon_MouseClick);
             // 
             // trayMenu
             // 
@@ -176,58 +172,26 @@
             // reportsToolStripMenuItem
             // 
             this.reportsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.averagesToolStripMenuItem,
-            this.printToolStripMenuItem});
+            this.weeklyAveragesToolStripMenuItem});
             this.reportsToolStripMenuItem.Name = "reportsToolStripMenuItem";
             this.reportsToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
             this.reportsToolStripMenuItem.Text = "Reports";
             // 
-            // averagesToolStripMenuItem
-            // 
-            this.averagesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.monthlyAveragesToolStripMenuItem,
-            this.weeklyAveragesToolStripMenuItem});
-            this.averagesToolStripMenuItem.Name = "averagesToolStripMenuItem";
-            this.averagesToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
-            this.averagesToolStripMenuItem.Text = "Averages";
-            // 
-            // monthlyAveragesToolStripMenuItem
-            // 
-            this.monthlyAveragesToolStripMenuItem.Name = "monthlyAveragesToolStripMenuItem";
-            this.monthlyAveragesToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-            this.monthlyAveragesToolStripMenuItem.Text = "Monthly Averages";
-            this.monthlyAveragesToolStripMenuItem.Visible = false;
-            this.monthlyAveragesToolStripMenuItem.Click += new System.EventHandler(this.monthlyAveragesToolStripMenuItem_Click);
-            // 
             // weeklyAveragesToolStripMenuItem
             // 
             this.weeklyAveragesToolStripMenuItem.Name = "weeklyAveragesToolStripMenuItem";
-            this.weeklyAveragesToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.weeklyAveragesToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.weeklyAveragesToolStripMenuItem.Text = "Weekly Averages";
             this.weeklyAveragesToolStripMenuItem.Click += new System.EventHandler(this.statsToolStripMenuItem_Click);
-            // 
-            // printToolStripMenuItem
-            // 
-            this.printToolStripMenuItem.Name = "printToolStripMenuItem";
-            this.printToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
-            this.printToolStripMenuItem.Text = "Print";
-            this.printToolStripMenuItem.Click += new System.EventHandler(this.printToolStripMenuItem_Click);
             // 
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.supportedGamesToolStripMenuItem,
-            this.counterToolStripMenuItem});
+            this.counterToolStripMenuItem,
+            this.toolStripMenuItem1});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
-            // 
-            // supportedGamesToolStripMenuItem
-            // 
-            this.supportedGamesToolStripMenuItem.Name = "supportedGamesToolStripMenuItem";
-            this.supportedGamesToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
-            this.supportedGamesToolStripMenuItem.Text = "Supported Games";
-            this.supportedGamesToolStripMenuItem.Click += new System.EventHandler(this.supportedGamesToolStripMenuItem_Click);
             // 
             // counterToolStripMenuItem
             // 
@@ -248,14 +212,14 @@
             // settingsToolStripMenuItem2
             // 
             this.settingsToolStripMenuItem2.Name = "settingsToolStripMenuItem2";
-            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(116, 22);
+            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem2.Text = "Settings";
             this.settingsToolStripMenuItem2.Click += new System.EventHandler(this.allSettingsToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -316,6 +280,7 @@
             this.Last_Played.AspectName = "Last_Played";
             this.Last_Played.HeaderTextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Last_Played.MinimumWidth = 30;
+            this.Last_Played.Sortable = false;
             this.Last_Played.Text = "Last Played";
             this.Last_Played.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Last_Played.ToolTipText = "Last Time Played";
@@ -387,32 +352,12 @@
             this.Average_Session_Time.ToolTipText = "Average Session Time";
             this.Average_Session_Time.Width = 110;
             // 
-            // gamesListPrinter
+            // toolStripMenuItem1
             // 
-            // 
-            // 
-            // 
-            this.gamesListPrinter.CellFormat.CanWrap = true;
-            this.gamesListPrinter.CellFormat.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.gamesListPrinter.DocumentName = "Game Data";
-            // 
-            // 
-            // 
-            this.gamesListPrinter.FooterFormat.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Italic);
-            // 
-            // 
-            // 
-            this.gamesListPrinter.GroupHeaderFormat.Font = new System.Drawing.Font("Verdana", 10F, System.Drawing.FontStyle.Bold);
-            // 
-            // 
-            // 
-            this.gamesListPrinter.HeaderFormat.Font = new System.Drawing.Font("Verdana", 24F);
-            // 
-            // 
-            // 
-            this.gamesListPrinter.ListHeaderFormat.CanWrap = true;
-            this.gamesListPrinter.ListHeaderFormat.Font = new System.Drawing.Font("Verdana", 12F);
-            this.gamesListPrinter.ListView = this.gamesList;
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(168, 22);
+            this.toolStripMenuItem1.Text = "Supported Games";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.supportedGamesToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -422,14 +367,15 @@
             this.Controls.Add(this.gamesList);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.topMenu);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.topMenu;
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "MainForm";
+            this.ShowIcon = false;
             this.Text = "Game Data";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.gameMenu.ResumeLayout(false);
             this.trayMenu.ResumeLayout(false);
             this.statusStrip.ResumeLayout(false);
@@ -468,17 +414,13 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem sessionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem infoToolStripMenuItem;
-        private BrightIdeasSoftware.ListViewPrinter gamesListPrinter;
         private System.Windows.Forms.ToolStripMenuItem reportsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem printToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem counterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem averagesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem weeklyAveragesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem monthlyAveragesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem supportedGamesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem weeklyAveragesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
     }
 }
 

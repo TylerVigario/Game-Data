@@ -14,7 +14,7 @@ namespace Game_Data
         {
             InitializeComponent();
             //
-            game = data.Name;
+            game = data.ID;
         }
 
         public string Game_Loaded { get { return game; } }

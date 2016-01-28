@@ -21,7 +21,7 @@ namespace Game_Data
 
         private void AboutForm_Load(object sender, EventArgs e)
         {
-            this.Text = "About Game Data v" + Application.ProductVersion + " beta";
+            this.Text = "About Game Data v" + Application.ProductVersion + " RC2";
         }
 
         private void AboutForm_FormClosed(object sender, FormClosedEventArgs e)

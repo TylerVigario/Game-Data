@@ -165,9 +165,9 @@
             this.Controls.Add(this.editButton);
             this.Controls.Add(this.removeButton);
             this.Controls.Add(this.addButton);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SupportedGamesForm";
+            this.ShowIcon = false;
             this.Text = "Supported Games Editor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SupportedGamesForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SupportedGamesForm_FormClosed);

@@ -7,21 +7,20 @@ using IniParser.Model;
 
 namespace Game_Data
 {
-    public delegate void addGameHandler(SupportedGame s, SupportedGame oldItem);
+    public delegate void addGameHandler(SupportedGame nGame, SupportedGame oGame);
 
     public partial class AddSupportedGameForm : Form
     {
         private static bool open = false;
-        //
+        private string _id;
         private SupportedGame sItem;
-        //
         public event addGameHandler addGame;
-        //
         List<string> supportedProcs = new List<string>();
 
-        public AddSupportedGameForm()
+        public AddSupportedGameForm(int id)
         {
             InitializeComponent();
+            _id = id.ToString();
         }
 
         public AddSupportedGameForm(SupportedGame s)
@@ -50,23 +49,15 @@ namespace Game_Data
         private void button1_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(textBox2.Text) || String.IsNullOrEmpty(comboBox1.Text)) { return; }
+            SupportedGame nGame;
+            if (sItem != null)
+            {
+                nGame = new SupportedGame(sItem.ID, textBox2.Text.Trim(), comboBox1.Text.Trim().ToLower());
+                if (sItem.Game_Name == nGame.Game_Name && sItem.Process_Name == nGame.Process_Name) { this.Close(); }
+            }
+            else { nGame = new SupportedGame(_id, textBox2.Text.Trim(), comboBox1.Text.Trim().ToLower()); }
             //
-            string game_name = textBox2.Text.Trim();
-            string process_name = comboBox1.Text.Trim().ToLower();
-            string section_name = GameDatabase.gameNameSaferizer(game_name);
-            //
-            var parser = new FileIniDataParser();
-            IniData ini = parser.ReadFile(Application.StartupPath + "\\games.ini");
-            ini.Sections.AddSection(section_name);
-            ini[section_name].AddKey("Process_Name", process_name);
-            ini[section_name].AddKey("Game_Name", game_name);
-            parser.WriteFile(Application.StartupPath + "\\games.ini", ini);
-            //
-            SupportedGame nGame = new SupportedGame(game_name, process_name);
             addGame(nGame, sItem);
-            if (sItem == null) { GameWatcher.AddSupportedGame(nGame); }
-            else { GameWatcher.EditSupportedGame(new SupportedGame(sItem.Game_Name, sItem.Process_Name), nGame); }
-            //
             this.Close();
         }
 

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using IniParser;
+using IniParser.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using IniParser;
-using IniParser.Model;
 
 namespace Game_Data
 {
@@ -19,7 +19,7 @@ namespace Game_Data
         private static string dataFolder;
         public static List<GameData> GamesData;
         private static List<CachedSessionsList> CachedSessions;
-        private static Timer cacheTimer;
+        private static System.Timers.Timer cacheTimer;
         //
         public static event LoadedD Loaded;
         public static event GameStartedD GameStarted;
@@ -40,7 +40,9 @@ namespace Game_Data
         {
             GamesData = new List<GameData>();
             CachedSessions = new List<CachedSessionsList>();
-            cacheTimer = new Timer(new TimerCallback(cacheTimer_Tick));
+            cacheTimer = new System.Timers.Timer();
+            cacheTimer.Elapsed += CacheTimer_Elapsed;
+            cacheTimer.Interval = 15000;
             dataFolder = Settings.Save_Path + "\\data";
             //
             if (!Directory.Exists(dataFolder)) { Directory.CreateDirectory(dataFolder); }
@@ -51,9 +53,8 @@ namespace Game_Data
                 {
                     var parser = new FileIniDataParser();
                     IniData ini = parser.ReadFile(gameFolder + "\\sessions.ini");
-                    GameData data = new GameData();
-                    data.Name = ini["General"]["Name"];
-                    CalculateGameStats(data, LoadGameSessions(ini["General"]["Name"]));
+                    GameData data = new GameData(Path.GetFileName(gameFolder), ini["General"]["Name"]);
+                    CalculateGameStats(data, LoadGameSessions(data.ID));
                     GamesData.Add(data);
                 }
             }
@@ -70,15 +71,13 @@ namespace Game_Data
             AddSession(game);
         }
 
-        public static List<SessionData> LoadGameSessions(string game_name)
+        public static List<SessionData> LoadGameSessions(string game_id)
         {
-            string dataPath = getGameDataPath(game_name);
-            //
-            CachedSessionsList cache = CachedSessions.Find(delegate(CachedSessionsList x) { return x.Game_Name == game_name; });
+            CachedSessionsList cache = CachedSessions.Find(delegate(CachedSessionsList x) { return x.Game_ID == game_id; });
             if (cache != null) { cache.Reset();  return cache.Sessions; }
             //
             var parser = new FileIniDataParser();
-            IniData data = parser.ReadFile(dataPath + "sessions.ini");
+            IniData data = parser.ReadFile(dataFolder + "\\" + game_id + "\\sessions.ini");
             //
             if (data.Sections.Count > 0)
             {
@@ -91,16 +90,12 @@ namespace Game_Data
                         session = new SessionData();
                         session.Start_Time = DateTime.Parse(section.Keys["Start_Time"]);
                         session.End_Time = DateTime.Parse(section.Keys["End_Time"]);
-                        //
-                        if (session.Start_Time > DateTime.MinValue && session.End_Time > DateTime.MinValue)
-                        {
-                            sessions.Add(session);
-                        }
+                        sessions.Add(session);
                     }
                 }
                 //
-                CachedSessions.Add(new CachedSessionsList(game_name, sessions));
-                cacheTimer.Change(0, 20000);
+                CachedSessions.Add(new CachedSessionsList(game_id, sessions));
+                cacheTimer.Enabled = true;
                 //
                 return sessions;
             }
@@ -129,13 +124,18 @@ namespace Game_Data
             }
         }
 
-        private static void cacheTimer_Tick(object state)
+        private static void CacheTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            for (int i = 0; i < CachedSessions.Count; i++)
+            List<CachedSessionsList> removeList = new List<CachedSessionsList>();
+            foreach (CachedSessionsList session in CachedSessions)
             {
-                if (DateTime.Now >= CachedSessions[i].Expire_Time) { CachedSessions.Remove(CachedSessions[i]); }
+                if (DateTime.Now >= session.Expire_Time) { removeList.Add(session); }
             }
-            if (CachedSessions.Count == 0) { cacheTimer.Change(Timeout.Infinite, Timeout.Infinite); }
+            foreach (CachedSessionsList session in removeList)
+            {
+                CachedSessions.Remove(session);
+            }
+            if (CachedSessions.Count == 0) { cacheTimer.Enabled = false; }
         }
 
         public static void Dispose()
@@ -149,7 +149,7 @@ namespace Game_Data
 
         private static void Game_Started(SupportedGame sGame, DateTime time)
         {
-            string dataPath = getGameDataPath(sGame.Game_Name);
+            string dataPath = dataFolder + "\\" + sGame.ID + "\\";
             //
             if (!Directory.Exists(dataPath)) { Directory.CreateDirectory(dataPath); }
             if (!File.Exists(dataPath + "sessions.ini"))
@@ -160,8 +160,7 @@ namespace Game_Data
                 var parser = new FileIniDataParser();
                 parser.WriteFile(dataPath + "sessions.ini", ini);
                 //
-                GameData game = new GameData();
-                game.Name = sGame.Game_Name;
+                GameData game = new GameData(sGame.ID, sGame.Game_Name);
                 game.Sessions = 1;
                 game.Last_Played = time;
                 GamesData.Add(game);
@@ -169,7 +168,7 @@ namespace Game_Data
             }
             else
             {
-                GameData game = GamesData.Find(delegate(GameData x) { return x.Name == sGame.Game_Name; });
+                GameData game = GamesData.Find(delegate(GameData x) { return x.ID == sGame.ID; });
                 game.Sessions++;
                 game.Last_Played = time;
                 GameStarted(game, time);
@@ -178,22 +177,28 @@ namespace Game_Data
 
         public static void AddSession(SupportedGame sGame)
         {
-            GameData game = GamesData.Find(delegate (GameData x) { return x.Name == sGame.Game_Name; });
+            GameData game = GamesData.Find(delegate (GameData x) { return x.ID == sGame.ID; });
             SessionData session = new SessionData(game.Last_Played, DateTime.Now);
             AddSession(game, session);
             GameClosed(game, session);
         }
 
-        public static void AddSession(string game_name, SessionData session)
+        public static void AddSession(string game_id, SessionData session)
         {
-            GameData game = GamesData.Find(delegate (GameData x) { return x.Name == game_name; });
+            GameData game = GamesData.Find(delegate (GameData x) { return x.ID == game_id; });
+            game.Sessions++;
             AddSession(game, session);
         }
 
-        public static void AddSession(GameData game, SessionData session)
+        public static bool AddSession(GameData game, SessionData session)
         {
-            if (session.Time_Span.TotalSeconds < Settings.Session_Threshold) return;
-            string dataPath = getGameDataPath(game.Name);
+            if (session.Time_Span.TotalSeconds < Settings.Session_Threshold)
+            {
+                CalculateGameStats(game, LoadGameSessions(game.ID));
+                SessionAdded(game, session);
+                return false;
+            }
+            string dataPath = dataFolder + "\\" + game.ID + "\\";
             var parser = new FileIniDataParser();
             IniData ini = parser.ReadFile(dataPath + "sessions.ini");
             //
@@ -205,16 +210,19 @@ namespace Game_Data
             parser.WriteFile(dataPath + "sessions.ini", ini);
             //
             if (game.First_Played == DateTime.MinValue) { game.First_Played = session.Start_Time; }
-            game.Last_Played = session.End_Time;
+            if (session.End_Time > game.Last_Played)
+            {
+                game.Last_Played = session.End_Time;
+                game.Last_Session_Time = span;
+            }
             game.Total_Time = game.Total_Time.Add(span);
             if (span > game.Maximum_Session_Time) { game.Maximum_Session_Time = span; }
             if (span < game.Minimum_Session_Time) { game.Minimum_Session_Time = span; }
             game.Average_Session_Time = TimeSpan.FromSeconds(game.Total_Time.TotalSeconds / game.Sessions);
-            game.Last_Session_Time = span;
             //
             SessionAdded(game, session);
             //
-            CachedSessionsList cache = CachedSessions.Find(delegate (CachedSessionsList x) { return x.Game_Name == game.Name; });
+            CachedSessionsList cache = CachedSessions.Find(delegate (CachedSessionsList x) { return x.Game_ID == game.ID; });
             if (cache != null) { cache.Reset(); cache.Sessions.Add(session); }
             else
             {
@@ -222,6 +230,7 @@ namespace Game_Data
                 sessions.Add(session);
                 CachedSessions.Add(new CachedSessionsList(game.Name, sessions));
             }
+            return true;
         }
 
         #endregion
@@ -230,11 +239,12 @@ namespace Game_Data
 
         public static void RemoveGame(GameData game)
         {
-            string dataPath = getGameDataPath(game.Name);
+            string dataPath = dataFolder + "\\" + game.ID + "\\";
             //
             Directory.Delete(dataPath, true);
-            removeCachedSessions(game.Name);
             GamesData.Remove(game);
+            CachedSessionsList cache = CachedSessions.Find(delegate (CachedSessionsList x) { return x.Game_ID == game.ID; });
+            if (cache != null) { CachedSessions.Remove(cache); }
             //
             GameRemoved(game);
         }
@@ -243,32 +253,26 @@ namespace Game_Data
         {
             foreach (GameData game in games)
             {
-                string dataPath = getGameDataPath(game.Name);
-                //
-                Directory.Delete(dataPath, true);
-                removeCachedSessions(game.Name);
-                GamesData.Remove(game);
-                //
-                GameRemoved(game);
+                RemoveGame(game);
             }
         }
 
-        public static void RemoveSession(string game_name, SessionData session)
+        public static void RemoveSession(string game_id, SessionData session)
         {
-            string dataPath = getGameDataPath(game_name);
-            GameData game = GamesData.Find(delegate(GameData x) { return x.Name == game_name; });
+            string dataPath = dataFolder + "\\" + game_id + "\\";
+            GameData game = GamesData.Find(delegate(GameData x) { return x.ID == game_id; });
             //
             var parser = new FileIniDataParser();
             IniData ini = parser.ReadFile(dataPath + "sessions.ini");
             ini.Sections.RemoveSection(getSectionName(session.End_Time));
             parser.WriteFile(dataPath + "sessions.ini", ini);
             //
-            CachedSessionsList cache = CachedSessions.Find(delegate (CachedSessionsList x) { return x.Game_Name == game_name; });
+            CachedSessionsList cache = CachedSessions.Find(delegate (CachedSessionsList x) { return x.Game_ID == game_id; });
             if (cache != null) { cache.Reset(); cache.Sessions.Remove(cache.Sessions.Find(delegate (SessionData x) { return x.Start_Time == session.Start_Time; })); }
             //
             if (game.Minimum_Session_Time == session.Time_Span || game.Minimum_Session_Time == session.Time_Span || game.Last_Session_Time == session.Time_Span || game.Last_Played == session.End_Time)
             {
-                CalculateGameStats(game, LoadGameSessions(game_name));
+                CalculateGameStats(game, LoadGameSessions(game_id));
             }
             else
             {
@@ -286,46 +290,18 @@ namespace Game_Data
 
         public static void RenameGame(SupportedGame old_, SupportedGame new_)
         {
-            GameData game = GamesData.Find(delegate (GameData x) { return x.Name == old_.Game_Name; });
+            GameData game = GamesData.Find(delegate (GameData x) { return x.ID == old_.ID; });
             GameData nGame = game;
             nGame.Name = new_.Game_Name;
             GameRenamed(game, nGame);
             game.Name = new_.Game_Name;
             //
-            string dataPath = getGameDataPath(old_.Game_Name);
+            string dataPath = dataFolder + "\\" + game.ID + "\\";
             var parser = new FileIniDataParser();
             IniData ini = parser.ReadFile(dataPath + "sessions.ini");
             ini["General"]["Name"] = new_.Game_Name;
             parser.WriteFile(dataPath + "sessions.ini", ini);
-            Directory.Move(dataPath, dataFolder + "\\" + gameNameSaferizer(new_.Game_Name));
         }
-
-        /*public static SessionListItem MergeSessions(string game_name, List<SessionListItem> sessions)
-        {
-            string dataPath = getGameDataPath(game_name);
-            GameData game = GamesData.Find(delegate(GameData x) { return x.Name == game_name; });
-            var parser = new FileIniDataParser();
-            IniData ini = parser.ReadFile(dataPath + "sessions.ini");
-            //
-            SessionData session_data = new SessionData();
-            foreach (SessionListItem session in sessions)
-            {
-                if (session.Date < session_data.Start_Time) { session_data.Start_Time = session.Date; }
-                DateTime end = session.Date.Add(session.Time);
-                if (end > session_data.End_Time) { session_data.End_Time = end; }
-                //
-                ini.Sections.RemoveSection(getSectionName(end));
-            }
-            //
-            string new_section = getSectionName(session_data.End_Time);
-            ini.WriteValue(new_section, "Start_Time", session_data.Start_Time.ToString());
-            ini.WriteValue(new_section, "End_Time", session_data.End_Time.ToString());
-            //
-            removeCachedSessions(game_name);
-            LoadSessions(game.Name);
-            RefreshGame(game);
-            return new SessionListItem(session_data);
-        }*/
 
         #endregion
 
@@ -386,29 +362,9 @@ namespace Game_Data
             }
         }
 
-        public static string getGameDataPath(string game_name)
-        {
-            return dataFolder + "\\" + gameNameSaferizer(game_name) + "\\";
-        }
-
-        public static string gameNameSaferizer(string game_name)
-        {
-            foreach (char c in Path.GetInvalidFileNameChars())
-            {
-                game_name = game_name.Replace(c.ToString(), "");
-            }
-            return game_name.ToLower().Replace(" ", "_");
-        }
-
         public static string getSectionName(DateTime end_date)
         {
             return (end_date.Ticks / 600000000).ToString();
-        }
-
-        private static void removeCachedSessions(string game_name)
-        {
-            CachedSessionsList cache = CachedSessions.Find(delegate(CachedSessionsList x) { return x.Game_Name == game_name; });
-            if (cache != null) { CachedSessions.Remove(cache); }
         }
 
         #endregion
@@ -418,7 +374,8 @@ namespace Game_Data
 
     public class GameData
     {
-        private string _name = "";
+        private string _id;
+        private string _name;
         private int _sessions = 0;
         private DateTime _first_played = DateTime.MaxValue;
         private DateTime _last_played = DateTime.MinValue;
@@ -427,6 +384,12 @@ namespace Game_Data
         private TimeSpan _minimum_session_time = TimeSpan.MaxValue;
         private TimeSpan _average_session_time = TimeSpan.Zero;
         private TimeSpan _last_session_time = TimeSpan.Zero;
+
+        public GameData(string id, string name)
+        {
+            _id = id;
+            _name = name;
+        }
 
         public void Reset()
         {
@@ -438,6 +401,11 @@ namespace Game_Data
             _minimum_session_time = TimeSpan.MaxValue;
             _average_session_time = TimeSpan.Zero;
             _last_session_time = TimeSpan.Zero;
+        }
+
+        public string ID
+        {
+            get { return _id; }
         }
 
         public string Name
@@ -501,7 +469,7 @@ namespace Game_Data
 
     public class SessionData
     {
-        DateTime _start_time = DateTime.MinValue;
+        DateTime _start_time = DateTime.MaxValue;
         DateTime _end_time = DateTime.MinValue;
 
         public SessionData() { }
@@ -540,20 +508,24 @@ namespace Game_Data
 
     public class CachedSessionsList
     {
-        public string Game_Name;
+        private string gid;
         public List<SessionData> Sessions;
-        public DateTime Expire_Time;
+        private DateTime expire;
 
-        public CachedSessionsList(string name, List<SessionData> s)
+        public CachedSessionsList(string _id, List<SessionData> s)
         {
-            Game_Name = name;
+            gid = _id.ToString();
             Sessions = s;
-            Expire_Time = DateTime.Now.AddMinutes(2);
+            expire = DateTime.Now.AddMinutes(1);
         }
+
+        public string Game_ID { get { return gid; } }
+
+        public DateTime Expire_Time {  get { return expire; } }
 
         public void Reset()
         {
-            Expire_Time = DateTime.Now.AddMinutes(2);
+            expire = DateTime.Now.AddMinutes(1);
         }
     }
 

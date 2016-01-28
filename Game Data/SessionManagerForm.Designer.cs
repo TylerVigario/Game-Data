@@ -35,8 +35,9 @@
             this.Time_Span = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.sessionMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mergeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mergToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.sessionsList)).BeginInit();
             this.sessionMenu.SuspendLayout();
             this.SuspendLayout();
@@ -85,33 +86,42 @@
             // 
             this.sessionMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addToolStripMenuItem,
-            this.mergeToolStripMenuItem,
-            this.removeToolStripMenuItem});
+            this.editToolStripMenuItem,
+            this.removeToolStripMenuItem,
+            this.mergToolStripMenuItem});
             this.sessionMenu.Name = "sessionsMenu";
-            this.sessionMenu.Size = new System.Drawing.Size(118, 70);
+            this.sessionMenu.Size = new System.Drawing.Size(153, 114);
             // 
             // addToolStripMenuItem
             // 
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.addToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.addToolStripMenuItem.Text = "Add";
             this.addToolStripMenuItem.Click += new System.EventHandler(this.addToolStripMenuItem_Click);
             // 
-            // mergeToolStripMenuItem
+            // editToolStripMenuItem
             // 
-            this.mergeToolStripMenuItem.Enabled = false;
-            this.mergeToolStripMenuItem.Name = "mergeToolStripMenuItem";
-            this.mergeToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
-            this.mergeToolStripMenuItem.Text = "Merge";
-            this.mergeToolStripMenuItem.Click += new System.EventHandler(this.mergeToolStripMenuItem_Click);
+            this.editToolStripMenuItem.Enabled = false;
+            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editToolStripMenuItem.Text = "Edit";
+            this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
             // 
             // removeToolStripMenuItem
             // 
             this.removeToolStripMenuItem.Enabled = false;
             this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            this.removeToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.removeToolStripMenuItem.Text = "Remove";
             this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+            // 
+            // mergToolStripMenuItem
+            // 
+            this.mergToolStripMenuItem.Enabled = false;
+            this.mergToolStripMenuItem.Name = "mergToolStripMenuItem";
+            this.mergToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mergToolStripMenuItem.Text = "Merge";
+            this.mergToolStripMenuItem.Click += new System.EventHandler(this.mergToolStripMenuItem_Click);
             // 
             // SessionManagerForm
             // 
@@ -119,9 +129,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(242, 299);
             this.Controls.Add(this.sessionsList);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SessionManagerForm";
+            this.ShowIcon = false;
             this.Text = "Session Manager";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SessionManagerForm_FormClosing);
             this.Load += new System.EventHandler(this.SessionManagerForm_Load);
@@ -138,7 +148,8 @@
         private BrightIdeasSoftware.OLVColumn Time_Span;
         private System.Windows.Forms.ContextMenuStrip sessionMenu;
         private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mergeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mergToolStripMenuItem;
     }
 }

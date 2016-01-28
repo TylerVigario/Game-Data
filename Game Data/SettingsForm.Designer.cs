@@ -248,7 +248,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(282, 156);
+            this.tabPage1.Size = new System.Drawing.Size(266, 156);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "General";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -258,9 +258,9 @@
             this.checkBox4.AutoSize = true;
             this.checkBox4.Location = new System.Drawing.Point(11, 84);
             this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(88, 17);
+            this.checkBox4.Size = new System.Drawing.Size(102, 17);
             this.checkBox4.TabIndex = 8;
-            this.checkBox4.Text = "Close to Tray";
+            this.checkBox4.Text = "Minimize to Tray";
             this.checkBox4.UseVisualStyleBackColor = true;
             // 
             // tabPage3

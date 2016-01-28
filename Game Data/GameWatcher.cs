@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using IniParser;
+using IniParser.Model;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Management;
-using IniParser;
-using IniParser.Model;
-using System;
 
 namespace Game_Data
 {
@@ -15,9 +15,7 @@ namespace Game_Data
     {
         public static event gameStartedD gameStarted;
         public static event gameClosedD gameClosed;
-        //
-        private static List<SupportedGame> supportedGames = new List<SupportedGame>();
-        //
+        public static List<SupportedGame> supportedGames = new List<SupportedGame>();
         ManagementEventWatcher processWatcher;
 
         public GameWatcher()
@@ -28,11 +26,11 @@ namespace Game_Data
             {
                 if (section.SectionName != "General")
                 {
-                    supportedGames.Add(new SupportedGame(section.Keys["Game_Name"], section.Keys["Process_Name"]));
+                    supportedGames.Add(new SupportedGame(section.SectionName, section.Keys["Game_Name"], section.Keys["Process_Name"]));
                 }
             }
             //
-            processWatcher = new ManagementEventWatcher(@"SELECT * FROM __InstanceOperationEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_Process'");
+            processWatcher = new ManagementEventWatcher(@"SELECT * FROM __InstanceOperationEvent WITHIN 1.5 WHERE TargetInstance ISA 'Win32_Process'");
             processWatcher.EventArrived += processWatcher_EventArrived;
         }
 
@@ -64,7 +62,12 @@ namespace Game_Data
             supportedGames.Add(nGame);
             if (oGame.Process_Name != nGame.Process_Name)
             {
-                Process[] procs = Process.GetProcessesByName(nGame.Process_Name);
+                Process[] procs = Process.GetProcessesByName(oGame.Process_Name);
+                if (procs.Length > 0)
+                {
+                    gameClosed(oGame);
+                }
+                procs = Process.GetProcessesByName(nGame.Process_Name);
                 if (procs.Length > 0)
                 {
                     gameStarted(nGame, procs[0].StartTime);
@@ -111,18 +114,12 @@ namespace Game_Data
                 {
                     case "__InstanceCreationEvent":
                         {
-                            if (gameStarted != null)
-                            {
-                                gameStarted(game, DateTime.Now);
-                            }
+                            gameStarted(game, DateTime.Now);
                             break;
                         }
                     case "__InstanceDeletionEvent":
                         {
-                            if (gameClosed != null)
-                            {
-                                gameClosed(game);
-                            }
+                            gameClosed(game);
                             break;
                         }
                 }
@@ -131,24 +128,4 @@ namespace Game_Data
             mbo.Dispose();
         }
     }
-
-    #region Supported Game
-
-    public class SupportedGame
-    {
-        private string _game_name;
-        private string _process_name;
-
-        public SupportedGame(string g_n, string p_n)
-        {
-            _game_name = g_n;
-            _process_name = p_n;
-        }
-
-        public string Game_Name { get { return _game_name; } }
-
-        public string Process_Name { get { return _process_name; } }
-    }
-
-    #endregion
 }

@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
-using BrightIdeasSoftware;
 
 namespace Game_Data
 {
     public partial class MainForm : Form
     {
         Mutex appMutex;
+        private bool allowshowdisplay = true;
         AboutForm about_form;
         SettingsForm settings_form;
         SupportedGamesForm supported_games_form;
         List<WeeklyAveragesForm> game_stats_form = new List<WeeklyAveragesForm>();
         List<SessionManagerForm> session_manager_form = new List<SessionManagerForm>();
         List<GameInfoForm> game_info_form = new List<GameInfoForm>();
-        //
         List<string> messagePump = new List<string>();
 
         #region Form Load/Close
@@ -37,14 +35,16 @@ namespace Game_Data
             //
             InitializeComponent();
             //
-            this.Text = "Game Data v" + Application.ProductVersion + " beta";
-            trayIcon.Text = "Game Data v" + Application.ProductVersion + " beta";
-            //
             Settings.load();
             //
             WindowGeometry.GeometryFromString(Settings.Main_Window_Geometry, this);
             gamesList.RestoreState(Convert.FromBase64String(Settings.GamesList_State));
-            if (Settings.Start_Hidden) { HideMe(true); }
+            if (Settings.Start_Hidden)
+            {
+                allowshowdisplay = false;
+                this.ShowInTaskbar = false;
+                trayIcon.Visible = true;
+            }
             //
             #region ObjectListView stuff
 
@@ -52,9 +52,7 @@ namespace Game_Data
             //
             this.Last_Played.AspectToStringConverter = delegate (object x)
             {
-                DateTime last = (DateTime)x;
-                if (last > DateTime.Now) { return "Right Now"; }
-                else { return GameDatabase.calculateLastPlayedString(last); }
+                return GameDatabase.calculateLastPlayedString((DateTime)x);
             };
             this.Total_Time.AspectToStringConverter = delegate (object x)
             {
@@ -94,25 +92,30 @@ namespace Game_Data
             GameDatabase.Load();
         }
 
+        protected override void SetVisibleCore(bool value)
+        {
+            base.SetVisibleCore(allowshowdisplay ? value : allowshowdisplay);
+        }
+
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (e.CloseReason == CloseReason.UserClosing && Settings.Close_To_Tray)
-            {
-                e.Cancel = true;
-                HideMe();
-            }
-            else
-            {
+            if (e.CloseReason == CloseReason.UserClosing)
+            { 
                 closeGD(true);
             }
         }
 
-        private void HideMe(bool first = false)
+        private void MainForm_Resize(object sender, EventArgs e)
         {
-            this.ShowInTaskbar = false;
-            this.trayIcon.Visible = true;
-            if (first) { this.WindowState = FormWindowState.Minimized; }
-            else { this.Hide(); }
+            if (WindowState == FormWindowState.Minimized)
+            {
+                if (Settings.Close_To_Tray)
+                {
+                    allowshowdisplay = false;
+                    this.ShowInTaskbar = false;
+                    trayIcon.Visible = true;
+                }
+            }
         }
 
         private void closeGD(bool skip_c = false)
@@ -144,18 +147,21 @@ namespace Game_Data
 
         #region Tray Icon
 
-        private void trayIcon_DoubleClick(object sender, EventArgs e)
+        private void trayIcon_MouseClick(object sender, MouseEventArgs e)
         {
-            this.ShowInTaskbar = true;
-            trayIcon.Visible = false;
-            if (this.WindowState == FormWindowState.Minimized) { this.WindowState = FormWindowState.Normal; }
-            else { this.Show(); }
-            this.BringToFront();
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                this.allowshowdisplay = true;
+                this.Visible = !this.Visible;
+                this.ShowInTaskbar = true;
+                this.WindowState = FormWindowState.Normal;
+                trayIcon.Visible = false;
+            }
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            trayIcon_DoubleClick(null, null);
+            trayIcon_MouseClick(null, new MouseEventArgs(MouseButtons.Left, 2, 0, 0, 0));
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -209,7 +215,7 @@ namespace Game_Data
                 BeginInvoke(new SessionD(GameDatabase_GameClosed), new object[] { game, session });
                 return;
             }
-            displayStatus(game.Name + " has been closed after " + GameDatabase.calculateTimeString(game.Last_Session_Time, false) + '.', 5);
+            displayStatus(game.Name + " has been closed after " + GameDatabase.calculateTimeString(session.Time_Span, false) + '.', 5);
         }
 
         private void GameDatabase_GameRemoved(GameData game)
@@ -345,12 +351,6 @@ namespace Game_Data
             about_form.Dispose();
         }
 
-        private void printToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            gamesListPrinter.ListView = gamesList;
-            gamesListPrinter.PrintPreview();
-        }
-
         private void counterToolStripMenuItem_Click(object sender, EventArgs e)
         {
             new CounterForm().Show();
@@ -388,7 +388,7 @@ namespace Game_Data
                 {
                     foreach (SessionManagerForm form in session_manager_form)
                     {
-                        if (form.Game_Loaded.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower())
+                        if (form.Game_ID == ((GameData)gamesList.SelectedObject).ID)
                         {
                             form.BringToFront();
                             handled = true;
@@ -398,7 +398,7 @@ namespace Game_Data
                 }
                 if (!handled)
                 {
-                    SessionManagerForm temp = new SessionManagerForm(((GameData)gamesList.SelectedObject).Name);
+                    SessionManagerForm temp = new SessionManagerForm((GameData)gamesList.SelectedObject);
                     temp.FormClosing += SessionManager_FormClosing;
                     session_manager_form.Add(temp);
                     temp.Show();
@@ -493,10 +493,5 @@ namespace Game_Data
         }
 
         #endregion
-
-        private void monthlyAveragesToolStripMenuItem_Click(object sender, EventArgs e) /* In Progress */
-        {
-
-        }
     }
 }

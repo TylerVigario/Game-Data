@@ -7,12 +7,12 @@ namespace Game_Data
 {
     public partial class SessionManagerForm : Form
     {
-        private string game;
+        private string _game_id;
         private delegate void SetSessionsD(List<SessionData> sessions);
         //
         AddSessionForm add_session_form;
 
-        public SessionManagerForm(string game_name)
+        public SessionManagerForm(GameData game)
         {
             InitializeComponent();
             //
@@ -37,11 +37,11 @@ namespace Game_Data
 
             #endregion
             //
-            game = game_name;
-            this.Text = game_name + " - Sessions";
+            _game_id = game.ID;
+            this.Text = game.Name + " - Sessions";
         }
 
-        public string Game_Loaded { get { return game; } }
+        public string Game_ID { get { return _game_id; } }
 
         private void SessionManagerForm_Load(object sender, EventArgs e)
         {
@@ -53,7 +53,7 @@ namespace Game_Data
 
         private void GameDatabase_GameClosed(GameData _game, SessionData session)
         {
-            if (_game.Name == game)
+            if (_game.ID == _game_id)
             {
                 sessionsList.AddObject(session);
             }
@@ -61,7 +61,7 @@ namespace Game_Data
 
         private void LoadSessions()
         {
-            sessionsList.AddObjects(GameDatabase.LoadGameSessions(game));
+            sessionsList.AddObjects(GameDatabase.LoadGameSessions(_game_id));
         }
 
         private void SessionManagerForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -72,17 +72,8 @@ namespace Game_Data
 
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (SessionData session in sessionsList.SelectedObjects) { GameDatabase.RemoveSession(game, session); }
+            foreach (SessionData session in sessionsList.SelectedObjects) { GameDatabase.RemoveSession(_game_id, session); }
             sessionsList.RemoveObjects(sessionsList.SelectedObjects);
-        }
-
-        private void mergeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            /*if (sessionsList.SelectedObjects.Count > 1)
-            {
-                sessionsList.AddObject(GameDatabase.MergeSessions(game, (List<SessionListItem>)sessionsList.SelectedObjects));
-                sessionsList.RemoveObjects(sessionsList.SelectedObjects);
-            }*/
         }
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
@@ -105,10 +96,15 @@ namespace Game_Data
             add_session_form.Dispose();
         }
 
-        void add_session_form_sessionAdded(SessionData session)
+        void add_session_form_sessionAdded(SessionData nSes, SessionData oSes)
         {
-            sessionsList.AddObject(session);
-            GameDatabase.AddSession(game, session);
+            if (oSes != null)
+            {
+                sessionsList.RemoveObject(oSes);
+                GameDatabase.RemoveSession(_game_id, oSes);
+            }
+            sessionsList.AddObject(nSes);
+            GameDatabase.AddSession(_game_id, nSes);
         }
 
         private void sessionsList_SelectionChanged(object sender, EventArgs e)
@@ -116,14 +112,57 @@ namespace Game_Data
             if (sessionsList.SelectedObjects.Count > 0)
             {
                 removeToolStripMenuItem.Enabled = true;
-                if (sessionsList.SelectedObjects.Count > 1) { mergeToolStripMenuItem.Enabled = true; }
-                else { mergeToolStripMenuItem.Enabled = false; }
+                if (sessionsList.SelectedObjects.Count > 1)
+                {
+                    mergToolStripMenuItem.Enabled = true;
+                    editToolStripMenuItem.Enabled = false;
+                }
+                else
+                {
+                    mergToolStripMenuItem.Enabled = false;
+                    editToolStripMenuItem.Enabled = true;
+                }
             }
             else
             {
                 removeToolStripMenuItem.Enabled = false;
-                mergeToolStripMenuItem.Enabled = false;
+                editToolStripMenuItem.Enabled = false;
+                mergToolStripMenuItem.Enabled = false;
             }
+        }
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (AddSessionForm.isOpen)
+            {
+                add_session_form.BringToFront();
+            }
+            else
+            {
+                add_session_form = new AddSessionForm((SessionData)sessionsList.SelectedObject);
+                add_session_form.FormClosed += add_session_form_FormClosed;
+                add_session_form.sessionAdded += add_session_form_sessionAdded;
+                add_session_form.Show();
+            }
+        }
+
+        private void mergToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<SessionData> ses = new List<SessionData>();
+            SessionData s = new SessionData();
+            foreach (SessionData session in sessionsList.Objects)
+            {
+                if (session.Start_Time < s.Start_Time) { s.Start_Time = session.Start_Time; }
+                if (session.End_Time > s.End_Time) { s.End_Time = session.End_Time; }
+                ses.Add(session);
+            }
+            foreach (SessionData session in ses)
+            {
+                sessionsList.RemoveObject(session);
+                GameDatabase.RemoveSession(_game_id, session);
+            }
+            sessionsList.AddObject(s);
+            GameDatabase.AddSession(_game_id, s);
         }
     }
 }
