@@ -27,59 +27,25 @@ namespace Game_Data
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
+            if (!String.IsNullOrEmpty(Settings.Settings_Window_Geometry)) { WindowGeometry.GeometryFromString(Settings.Settings_Window_Geometry, this); }
             checkBox1.Checked = Util.IsAutoStartEnabled("Game_Data", Application.ExecutablePath);
             checkBox2.Checked = Settings.Start_Hidden;
-            checkBox3.Checked = Settings.Exit_Confrimation;
-            checkBox4.Checked = Settings.Close_To_Tray;
-            numericUpDown1.Value = (decimal)Settings.Session_Threshold;
-            //
-            switch (Settings.Time_Display_Level)
-            {
-                case 3:
-                    radioButton1.Checked = true;
-                    break;
-                case 2:
-                    radioButton2.Checked = true;
-                    break;
-                case 1:
-                    radioButton3.Checked = true;
-                    break;
-                case 0:
-                    radioButton4.Checked = true;
-                    break;
-            }
-            //
-            switch (Settings.Last_Played_Display_Level)
-            {
-                case 2:
-                    radioButton8.Checked = true;
-                    break;
-                case 1:
-                    radioButton7.Checked = true;
-                    break;
-                case 0:
-                    radioButton6.Checked = true;
-                    break;
-            }
-            //
+            checkBox3.Checked = Settings.Exit_Confirmation;
+            checkBox4.Checked = Settings.Minimize_To_Tray;
+            TimeSpan temp = TimeSpan.FromSeconds(Settings.Session_Threshold);
+            numericUpDown1.Value = temp.Seconds;
+            numericUpDown2.Value = temp.Minutes;
             this.checkBox1.CheckStateChanged += new System.EventHandler(this.checkBox1_CheckStateChanged);
         }
 
         private void SettingsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Settings.Session_Threshold = (int)numericUpDown1.Value;
+            Settings.Settings_Window_Geometry = WindowGeometry.GeometryToString(this);
+            TimeSpan temp = TimeSpan.FromMinutes((double)numericUpDown2.Value).Add(TimeSpan.FromSeconds((double)numericUpDown1.Value));
+            Settings.Session_Threshold = temp.TotalSeconds;
             Settings.Start_Hidden = checkBox2.Checked;
-            Settings.Exit_Confrimation = checkBox3.Checked;
-            Settings.Close_To_Tray = checkBox4.Checked;
-            //
-            if (radioButton1.Checked) { Settings.Time_Display_Level = 3; }
-            else if (radioButton2.Checked) { Settings.Time_Display_Level = 2; }
-            else if (radioButton3.Checked) { Settings.Time_Display_Level = 1; }
-            else if (radioButton4.Checked) { Settings.Time_Display_Level = 0; }
-            //
-            if (radioButton8.Checked) { Settings.Last_Played_Display_Level = 2; }
-            else if (radioButton7.Checked) { Settings.Last_Played_Display_Level = 1; }
-            else if (radioButton6.Checked) { Settings.Last_Played_Display_Level = 0; }
+            Settings.Exit_Confirmation = checkBox3.Checked;
+            Settings.Minimize_To_Tray = checkBox4.Checked;
         }
 
         private void SettingsForm_FormClosed(object sender, FormClosedEventArgs e)

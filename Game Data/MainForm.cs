@@ -9,22 +9,26 @@ namespace Game_Data
     {
         Mutex appMutex;
         private bool allowshowdisplay = true;
+        List<string> messagePump = new List<string>();
+        #region Forms
         AboutForm about_form;
         SettingsForm settings_form;
         SupportedGamesForm supported_games_form;
         List<WeeklyAveragesForm> game_stats_form = new List<WeeklyAveragesForm>();
         List<SessionManagerForm> session_manager_form = new List<SessionManagerForm>();
+        List<SessionsLengthForm> sessions_length_form = new List<SessionsLengthForm>();
         List<GameInfoForm> game_info_form = new List<GameInfoForm>();
-        List<string> messagePump = new List<string>();
+        #endregion
 
         #region Form Load/Close
 
         public MainForm()
         {
+            #region One instance
+
             try
             {
                 appMutex = Mutex.OpenExisting("game-data");
-                //
                 MessageBox.Show("Only one instance of Game Data may exist", "Game Data");
                 Environment.Exit(0);
             }
@@ -32,13 +36,13 @@ namespace Game_Data
             {
                 appMutex = new Mutex(false, "game-data");
             }
+
+            #endregion
             //
             InitializeComponent();
             //
             Settings.load();
-            //
-            WindowGeometry.GeometryFromString(Settings.Main_Window_Geometry, this);
-            gamesList.RestoreState(Convert.FromBase64String(Settings.GamesList_State));
+            if (!String.IsNullOrEmpty(Settings.Main_Window_Geometry)) { WindowGeometry.GeometryFromString(Settings.Main_Window_Geometry, this); }
             if (Settings.Start_Hidden)
             {
                 allowshowdisplay = false;
@@ -48,8 +52,7 @@ namespace Game_Data
             //
             #region ObjectListView stuff
 
-            gamesList.RestoreState(Convert.FromBase64String(Settings.GamesList_State));
-            //
+            if (!String.IsNullOrEmpty(Settings.GamesList_State)) { gamesList.RestoreState(Convert.FromBase64String(Settings.GamesList_State)); }
             this.Last_Played.AspectToStringConverter = delegate (object x)
             {
                 return GameDatabase.calculateLastPlayedString((DateTime)x);
@@ -64,9 +67,7 @@ namespace Game_Data
             };
             this.Minimum_Session_Time.AspectToStringConverter = delegate (object x)
             {
-                TimeSpan span = (TimeSpan)x;
-                if (span == TimeSpan.MaxValue) { return "0s"; }
-                return GameDatabase.calculateTimeString(span);
+                return GameDatabase.calculateTimeString((TimeSpan)x);
             };
             this.Average_Session_Time.AspectToStringConverter = delegate (object x)
             {
@@ -101,7 +102,7 @@ namespace Game_Data
         {
             if (e.CloseReason == CloseReason.UserClosing)
             { 
-                closeGD(true);
+                closeGD();
             }
         }
 
@@ -109,7 +110,7 @@ namespace Game_Data
         {
             if (WindowState == FormWindowState.Minimized)
             {
-                if (Settings.Close_To_Tray)
+                if (Settings.Minimize_To_Tray)
                 {
                     allowshowdisplay = false;
                     this.ShowInTaskbar = false;
@@ -118,9 +119,9 @@ namespace Game_Data
             }
         }
 
-        private void closeGD(bool skip_c = false)
+        private void closeGD()
         {
-            if (!Settings.Exit_Confrimation || skip_c || (MessageBox.Show("Are you sure you want to exit Game Data?", "Game Data", MessageBoxButtons.YesNo) == DialogResult.Yes))
+            if (!Settings.Exit_Confirmation || (MessageBox.Show("Are you sure you want to exit Game Data?", "Game Data", MessageBoxButtons.YesNo) == DialogResult.Yes))
             {
                 Settings.Main_Window_Geometry = WindowGeometry.GeometryToString(this);
                 Settings.GamesList_State = Convert.ToBase64String(gamesList.SaveState());
@@ -132,15 +133,6 @@ namespace Game_Data
                 trayIcon.Dispose();
                 Environment.Exit(0);
             }
-        }
-
-        private void gamesList_SelectionChanged(object sender, EventArgs e)
-        {
-            if (gamesList.SelectedObjects.Count > 0)
-            {
-                weeklyAveragesToolStripMenuItem.Enabled = true;
-            }
-            else { weeklyAveragesToolStripMenuItem.Enabled = false; }
         }
 
         #endregion
@@ -178,6 +170,11 @@ namespace Game_Data
 
         #region GameDatabase events
 
+        private void listUpdate_Tick(object sender, EventArgs e)
+        {
+            gamesList.RefreshObjects(GameDatabase.GamesData);
+        }
+
         void GameDatabase_Loaded(List<GameData> games)
         {
             if (InvokeRequired)
@@ -186,6 +183,10 @@ namespace Game_Data
                 return;
             }
             gamesList.SetObjects(games);
+            if (games.Count > 0)
+            {
+                listUpdate.Enabled = true;
+            }
         }
 
         private void GameDatabase_GameStarted(GameData game, DateTime time)
@@ -206,6 +207,7 @@ namespace Game_Data
             {
                 displayStatus(game.Name + " started at " + time.ToShortTimeString() + '.', 5);
             }
+            listUpdate.Enabled = true;
         }
 
         private void GameDatabase_GameClosed(GameData game, SessionData session)
@@ -226,6 +228,7 @@ namespace Game_Data
                 return;
             }
             gamesList.RemoveObject(game);
+            if (gamesList.Items.Count == 0) { listUpdate.Enabled = false; }
         }
 
         private void GameDatabase_GameRenamed(GameData old_, GameData new_)
@@ -247,6 +250,7 @@ namespace Game_Data
                 return;
             }
             gamesList.RefreshObject(game);
+            listUpdate.Enabled = true;
         }
 
         private void GameDatabase_SessionRemoved(GameData game, SessionData session)
@@ -293,6 +297,34 @@ namespace Game_Data
         #endregion
 
         #region Top Menu
+
+        private void gamesList_SelectionChanged(object sender, EventArgs e)
+        {
+            if (gamesList.SelectedObjects.Count > 0)
+            {
+                infoToolStripMenuItem.Enabled = true;
+                sessionsToolStripMenuItem.Enabled = true;
+                removeToolStripMenuItem.Enabled = true;
+                if (((GameData)gamesList.SelectedObject).Sessions > 0)
+                {
+                    weeklyAveragesToolStripMenuItem.Enabled = true;
+                    sessionsLengthToolStripMenuItem.Enabled = true;
+                }
+                else
+                {
+                    weeklyAveragesToolStripMenuItem.Enabled = false;
+                    sessionsLengthToolStripMenuItem.Enabled = false;
+                }
+            }
+            else
+            {
+                infoToolStripMenuItem.Enabled = false;
+                weeklyAveragesToolStripMenuItem.Enabled = false;
+                sessionsLengthToolStripMenuItem.Enabled = false;
+                sessionsToolStripMenuItem.Enabled = false;
+                removeToolStripMenuItem.Enabled = false;
+            }
+        }
 
         private void allSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -351,9 +383,94 @@ namespace Game_Data
             about_form.Dispose();
         }
 
-        private void counterToolStripMenuItem_Click(object sender, EventArgs e)
+        private void infoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new CounterForm().Show();
+            bool handled = false;
+            if (game_info_form.Count > 0)
+            {
+                foreach (GameInfoForm form in game_info_form)
+                {
+                    if (form.Game_Loaded.ID == ((GameData)gamesList.SelectedObject).ID)
+                    {
+                        form.BringToFront();
+                        handled = true;
+                        break;
+                    }
+                }
+            }
+            if (!handled)
+            {
+                GameInfoForm temp = new GameInfoForm(GameDatabase.GamesData.Find(delegate (GameData g) { return g.ID == ((GameData)gamesList.SelectedObject).ID; }));
+                temp.FormClosing += GameInfo_FormClosing;
+                game_info_form.Add(temp);
+                temp.Show();
+            }
+        }
+
+        void GameInfo_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            GameInfoForm form = sender as GameInfoForm;
+            game_info_form.Remove(form);
+        }
+
+        private void statsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            bool handled = false;
+            if (game_stats_form.Count > 0)
+            {
+                foreach (WeeklyAveragesForm form in game_stats_form)
+                {
+                    if (form.Game_ID == ((GameData)gamesList.SelectedObject).ID)
+                    {
+                        form.BringToFront();
+                        handled = true;
+                        break;
+                    }
+                }
+            }
+            if (!handled)
+            {
+                WeeklyAveragesForm temp = new WeeklyAveragesForm((GameData)gamesList.SelectedObject);
+                temp.FormClosing += GameStats_FormClosing;
+                game_stats_form.Add(temp);
+                temp.Show();
+            }
+        }
+
+        void GameStats_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SessionManagerForm form = sender as SessionManagerForm;
+            session_manager_form.Remove(form);
+        }
+
+        private void sessionsLengthToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            bool handled = false;
+            if (sessions_length_form.Count > 0)
+            {
+                foreach (SessionsLengthForm form in sessions_length_form)
+                {
+                    if (form.Game_ID == ((GameData)gamesList.SelectedObject).ID)
+                    {
+                        form.BringToFront();
+                        handled = true;
+                        break;
+                    }
+                }
+            }
+            if (!handled)
+            {
+                SessionsLengthForm temp = new SessionsLengthForm((GameData)gamesList.SelectedObject);
+                temp.FormClosing += SessionsLength_FormClosing;
+                sessions_length_form.Add(temp);
+                temp.Show();
+            }
+        }
+
+        private void SessionsLength_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SessionsLengthForm form = sender as SessionsLengthForm;
+            sessions_length_form.Remove(form);
         }
 
         #endregion
@@ -366,7 +483,7 @@ namespace Game_Data
             {
                 if (MessageBox.Show("Are you sure you want to remove " + '"' + ((GameData)gamesList.SelectedObject).Name + '"' + "'s  data?", "Remove Game Data", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    GameDatabase.RemoveGame(((GameData)gamesList.SelectedObject));
+                    GameDatabase.RemoveGame(((GameData)gamesList.SelectedObject).ID);
                 }
             }
             else if (gamesList.SelectedObjects.Count > 1)
@@ -412,40 +529,6 @@ namespace Game_Data
             session_manager_form.Remove(form);
         }
 
-        private void statsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (gamesList.SelectedObject != null)
-            {
-                if (((GameData)gamesList.SelectedObject).Sessions < 1) { MessageBox.Show("Nothing to show. Play a few sessions and then try again."); return; }
-                bool handled = false;
-                if (game_stats_form.Count > 0)
-                {
-                    foreach (WeeklyAveragesForm form in game_stats_form)
-                    {
-                        if (form.Game_Loaded.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower())
-                        {
-                            form.BringToFront();
-                            handled = true;
-                            break;
-                        }
-                    }
-                }
-                if (!handled)
-                {
-                    WeeklyAveragesForm temp = new WeeklyAveragesForm(GameDatabase.GamesData.Find(delegate (GameData g) { return g.Name.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower(); }));
-                    temp.FormClosing += GameStats_FormClosing;
-                    game_stats_form.Add(temp);
-                    temp.Show();
-                }
-            }
-        }
-
-        void GameStats_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            SessionManagerForm form = sender as SessionManagerForm;
-            session_manager_form.Remove(form);
-        }
-
         private void gamesList_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             sessionsToolStripMenuItem_Click(this, null);
@@ -457,39 +540,6 @@ namespace Game_Data
             {
                 e.Cancel = true;
             }
-        }
-
-        private void infoToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (gamesList.SelectedObject != null)
-            {
-                bool handled = false;
-                if (game_info_form.Count > 0)
-                {
-                    foreach (GameInfoForm form in game_info_form)
-                    {
-                        if (form.Game_Loaded.Name.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower())
-                        {
-                            form.BringToFront();
-                            handled = true;
-                            break;
-                        }
-                    }
-                }
-                if (!handled)
-                {
-                    GameInfoForm temp = new GameInfoForm(GameDatabase.GamesData.Find(delegate (GameData g) { return g.Name.ToLower() == ((GameData)gamesList.SelectedObject).Name.ToLower(); }));
-                    temp.FormClosing += GameInfo_FormClosing;
-                    game_info_form.Add(temp);
-                    temp.Show();
-                }
-            }
-        }
-
-        void GameInfo_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            GameInfoForm form = sender as GameInfoForm;
-            game_info_form.Remove(form);
         }
 
         #endregion

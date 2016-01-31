@@ -47,36 +47,23 @@
             System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint13 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(6D, 0D);
             System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint14 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(7D, 0D);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WeeklyAveragesForm));
-            this.GameName = new System.Windows.Forms.Label();
             this.sessionsADay = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.sessionsADay)).BeginInit();
             this.SuspendLayout();
             // 
-            // GameName
-            // 
-            this.GameName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.GameName.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.GameName.Location = new System.Drawing.Point(12, 9);
-            this.GameName.Name = "GameName";
-            this.GameName.Size = new System.Drawing.Size(706, 33);
-            this.GameName.TabIndex = 0;
-            this.GameName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // sessionsADay
             // 
-            this.sessionsADay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.sessionsADay.BackColor = System.Drawing.SystemColors.Control;
             this.sessionsADay.BorderSkin.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
             this.sessionsADay.BorderSkin.BorderWidth = 3;
             chartArea1.Name = "ChartArea1";
             this.sessionsADay.ChartAreas.Add(chartArea1);
+            this.sessionsADay.Dock = System.Windows.Forms.DockStyle.Fill;
             legend1.Name = "Legend1";
             this.sessionsADay.Legends.Add(legend1);
-            this.sessionsADay.Location = new System.Drawing.Point(2, 45);
+            this.sessionsADay.Location = new System.Drawing.Point(0, 0);
             this.sessionsADay.Name = "sessionsADay";
+            this.sessionsADay.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
             series1.ChartArea = "ChartArea1";
             series1.Legend = "Legend1";
             series1.Name = "Average Sessions";
@@ -114,18 +101,17 @@
             series2.Points.Add(dataPoint14);
             this.sessionsADay.Series.Add(series1);
             this.sessionsADay.Series.Add(series2);
-            this.sessionsADay.Size = new System.Drawing.Size(726, 238);
+            this.sessionsADay.Size = new System.Drawing.Size(692, 403);
             this.sessionsADay.TabIndex = 1;
             // 
             // WeeklyAveragesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(730, 280);
+            this.ClientSize = new System.Drawing.Size(692, 403);
             this.Controls.Add(this.sessionsADay);
-            this.Controls.Add(this.GameName);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(480, 272);
             this.Name = "WeeklyAveragesForm";
             this.Text = "Weekly Averages";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameStatsForm_FormClosing);
@@ -136,8 +122,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Label GameName;
         private System.Windows.Forms.DataVisualization.Charting.Chart sessionsADay;
     }
 }

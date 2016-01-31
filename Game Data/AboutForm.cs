@@ -21,7 +21,9 @@ namespace Game_Data
 
         private void AboutForm_Load(object sender, EventArgs e)
         {
-            this.Text = "About Game Data v" + Application.ProductVersion + " RC2";
+            this.Text = "About Game Data v" + Application.ProductVersion;
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionAlignment = HorizontalAlignment.Center;
         }
 
         private void AboutForm_FormClosed(object sender, FormClosedEventArgs e)

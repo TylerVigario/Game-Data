@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace Game_Data
 {
     public partial class SessionManagerForm : Form
     {
-        private string _game_id;
+        private GameData _game;
         private delegate void SetSessionsD(List<SessionData> sessions);
         //
         AddSessionForm add_session_form;
@@ -18,10 +18,11 @@ namespace Game_Data
             //
             #region ObjectListView stuff
 
-            sessionsList.RestoreState(Convert.FromBase64String(Settings.SessionsList_State));
+            if (!String.IsNullOrEmpty(Settings.SessionsList_State)) { sessionsList.RestoreState(Convert.FromBase64String(Settings.SessionsList_State)); }
             //
             this.Start_Time.AspectToStringConverter = delegate(object x) {
-                return GameDatabase.calculateLastPlayedString((DateTime)x, true);
+                DateTime time = (DateTime)x;
+                return time.Month.ToString() + "/" + time.Day.ToString() + "/" + time.Year.ToString().Substring(2) + " " + time.ToShortTimeString();
             };
             this.Time_Span.AspectToStringConverter = delegate(object x) {
                 return GameDatabase.calculateTimeString((TimeSpan)x);
@@ -37,43 +38,47 @@ namespace Game_Data
 
             #endregion
             //
-            _game_id = game.ID;
+            _game = game;
             this.Text = game.Name + " - Sessions";
         }
 
-        public string Game_ID { get { return _game_id; } }
+        public string Game_ID { get { return _game.ID; } }
 
         private void SessionManagerForm_Load(object sender, EventArgs e)
         {
             new Thread(new ThreadStart(LoadSessions)).Start();
             //
-            WindowGeometry.GeometryFromString(Settings.SessionManager_Window_Geometry, this);
+            if (!String.IsNullOrEmpty(Settings.SessionManager_Window_Geometry)) { WindowGeometry.GeometryFromString(Settings.SessionManager_Window_Geometry, this); }
             GameDatabase.GameClosed += GameDatabase_GameClosed;
         }
 
-        private void GameDatabase_GameClosed(GameData _game, SessionData session)
+        private void GameDatabase_GameClosed(GameData game, SessionData session)
         {
-            if (_game.ID == _game_id)
-            {
-                sessionsList.AddObject(session);
-            }
+            if (_game == game) { sessionsList.AddObject(session); }
         }
 
         private void LoadSessions()
         {
-            sessionsList.AddObjects(GameDatabase.LoadGameSessions(_game_id));
+            sessionsList.AddObjects(GameDatabase.LoadGameSessions(_game.ID));
         }
 
         private void SessionManagerForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (AddSessionForm.isOpen)
+            {
+                add_session_form.Close();
+            }
             Settings.SessionManager_Window_Geometry = WindowGeometry.GeometryToString(this);
             Settings.SessionsList_State = Convert.ToBase64String(sessionsList.SaveState());
         }
 
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (SessionData session in sessionsList.SelectedObjects) { GameDatabase.RemoveSession(_game_id, session); }
-            sessionsList.RemoveObjects(sessionsList.SelectedObjects);
+            if (MessageBox.Show("Are you sure you want to remove " + ((sessionsList.SelectedObjects.Count > 1) ? sessionsList.SelectedObjects.Count.ToString() + " sessions?" : "this session?"), "Remove Session" + ((sessionsList.SelectedObjects.Count > 1) ? "s" : "") + " - " + _game.Name, MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                foreach (SessionData session in sessionsList.SelectedObjects) { GameDatabase.RemoveSession(_game.ID, session); }
+                sessionsList.RemoveObjects(sessionsList.SelectedObjects);
+            }
         }
 
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
@@ -101,10 +106,10 @@ namespace Game_Data
             if (oSes != null)
             {
                 sessionsList.RemoveObject(oSes);
-                GameDatabase.RemoveSession(_game_id, oSes);
+                GameDatabase.RemoveSession(_game.ID, oSes);
             }
             sessionsList.AddObject(nSes);
-            GameDatabase.AddSession(_game_id, nSes);
+            GameDatabase.AddSession(_game.ID, nSes);
         }
 
         private void sessionsList_SelectionChanged(object sender, EventArgs e)
@@ -112,15 +117,20 @@ namespace Game_Data
             if (sessionsList.SelectedObjects.Count > 0)
             {
                 removeToolStripMenuItem.Enabled = true;
+                button3.Enabled = true;
                 if (sessionsList.SelectedObjects.Count > 1)
                 {
                     mergToolStripMenuItem.Enabled = true;
                     editToolStripMenuItem.Enabled = false;
+                    button2.Enabled = false;
+                    button4.Enabled = true;
                 }
                 else
                 {
                     mergToolStripMenuItem.Enabled = false;
                     editToolStripMenuItem.Enabled = true;
+                    button2.Enabled = true;
+                    button4.Enabled = false;
                 }
             }
             else
@@ -128,6 +138,8 @@ namespace Game_Data
                 removeToolStripMenuItem.Enabled = false;
                 editToolStripMenuItem.Enabled = false;
                 mergToolStripMenuItem.Enabled = false;
+                button2.Enabled = false;
+                button2.Enabled = false;
             }
         }
 
@@ -148,21 +160,24 @@ namespace Game_Data
 
         private void mergToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<SessionData> ses = new List<SessionData>();
-            SessionData s = new SessionData();
-            foreach (SessionData session in sessionsList.Objects)
+            if (MessageBox.Show("Are you sure you want merge these " + sessionsList.SelectedObjects.Count.ToString() + " sessions?", "Merge Sessions - " + _game.Name, MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (session.Start_Time < s.Start_Time) { s.Start_Time = session.Start_Time; }
-                if (session.End_Time > s.End_Time) { s.End_Time = session.End_Time; }
-                ses.Add(session);
+                List<SessionData> ses = new List<SessionData>();
+                SessionData s = new SessionData();
+                foreach (SessionData session in sessionsList.SelectedObjects)
+                {
+                    if (session.Start_Time < s.Start_Time) { s.Start_Time = session.Start_Time; }
+                    if (session.End_Time > s.End_Time) { s.End_Time = session.End_Time; }
+                    ses.Add(session);
+                }
+                foreach (SessionData session in ses)
+                {
+                    sessionsList.RemoveObject(session);
+                    GameDatabase.RemoveSession(_game.ID, session);
+                }
+                sessionsList.AddObject(s);
+                GameDatabase.AddSession(_game.ID, s);
             }
-            foreach (SessionData session in ses)
-            {
-                sessionsList.RemoveObject(session);
-                GameDatabase.RemoveSession(_game_id, session);
-            }
-            sessionsList.AddObject(s);
-            GameDatabase.AddSession(_game_id, s);
         }
     }
 }

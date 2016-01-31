@@ -180,6 +180,25 @@
         AABJRU5ErkJggg==
 </value>
   </data>
+  <data name="richTextBox1.Text" xml:space="preserve">
+    <value>Credits
+
+ObjectListView
+Phillip Piper (Grammarian)
+http://objectlistview.sourceforge.net
+
+CrashReporter.NET
+ravi15
+http://crashreporterdotnet.codeplex.com
+
+INIFileParser
+Ricardo Amores Hernández (rickyah)
+http://github.com/rickyah/ini-parser
+
+Window Geometry
+Samuel Allen
+http://codeproject.com/Articles/25510/Restore-Form-Position-and-Size-in-C</value>
+  </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAQAMDAAAAEAIACoJQAARgAAACAgAAABACAAqBAAAO4lAAAYGAAAAQAgAIgJAACWNgAAEBAAAAEA

@@ -3,7 +3,6 @@ using IniParser.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 
 namespace Game_Data
 {
@@ -33,7 +32,7 @@ namespace Game_Data
 
         public static void Load()
         {
-            new Thread(new ThreadStart(LoadWorker)).Start();
+            new System.Threading.Thread(new System.Threading.ThreadStart(LoadWorker)).Start();
         }
 
         public static void LoadWorker()
@@ -237,11 +236,12 @@ namespace Game_Data
 
         #region Remove Sections
 
-        public static void RemoveGame(GameData game)
+        public static void RemoveGame(string game_id)
         {
-            string dataPath = dataFolder + "\\" + game.ID + "\\";
+            GameData game = GamesData.Find(delegate (GameData x) { return x.ID == game_id; });
+            string dataPath = dataFolder + "\\" + game_id + "\\";
             //
-            Directory.Delete(dataPath, true);
+            if (Directory.Exists(dataPath)) { Directory.Delete(dataPath, true); }
             GamesData.Remove(game);
             CachedSessionsList cache = CachedSessions.Find(delegate (CachedSessionsList x) { return x.Game_ID == game.ID; });
             if (cache != null) { CachedSessions.Remove(cache); }
@@ -253,7 +253,7 @@ namespace Game_Data
         {
             foreach (GameData game in games)
             {
-                RemoveGame(game);
+                RemoveGame(game.ID);
             }
         }
 
@@ -288,19 +288,24 @@ namespace Game_Data
 
         #region Edit Sections
 
-        public static void RenameGame(SupportedGame old_, SupportedGame new_)
+        public static bool RenameGame(SupportedGame old_, SupportedGame new_)
         {
             GameData game = GamesData.Find(delegate (GameData x) { return x.ID == old_.ID; });
-            GameData nGame = game;
-            nGame.Name = new_.Game_Name;
-            GameRenamed(game, nGame);
-            game.Name = new_.Game_Name;
-            //
-            string dataPath = dataFolder + "\\" + game.ID + "\\";
-            var parser = new FileIniDataParser();
-            IniData ini = parser.ReadFile(dataPath + "sessions.ini");
-            ini["General"]["Name"] = new_.Game_Name;
-            parser.WriteFile(dataPath + "sessions.ini", ini);
+            if (game != null)
+            {
+                GameData nGame = game;
+                nGame.Name = new_.Game_Name;
+                GameRenamed(game, nGame);
+                game.Name = new_.Game_Name;
+                //
+                string dataPath = dataFolder + "\\" + game.ID + "\\";
+                var parser = new FileIniDataParser();
+                IniData ini = parser.ReadFile(dataPath + "sessions.ini");
+                ini["General"]["Name"] = new_.Game_Name;
+                parser.WriteFile(dataPath + "sessions.ini", ini);
+                return true;
+            }
+            return false;
         }
 
         #endregion
@@ -309,8 +314,7 @@ namespace Game_Data
 
         public static string calculateTimeString(TimeSpan span, bool compact = true)
         {
-            // TODO: Add support Time Display Level - Settings.Time_Display_Level
-            //
+            if (span == TimeSpan.MaxValue) { return "0s"; }
             string d, h, m, s;
             if (compact) { d = "d"; h = "h"; m = "m"; s = "s"; }
             else
@@ -336,29 +340,41 @@ namespace Game_Data
             else { return span.Seconds + s; }
         }
 
-        public static string calculateLastPlayedString(DateTime date, bool exact_date = false)
+        public static string calculateLastPlayedString(DateTime date)
         {
             if (date == DateTime.MinValue) { return "Never"; }
-            else if (date.Date == DateTime.Today) { return date.ToShortTimeString(); }
-            else if (exact_date) { return date.ToShortDateString(); }
+            else if (date.Date == DateTime.Today)
+            {
+                TimeSpan span = DateTime.Now - date;
+                if (span.Hours > 1) { return span.Hours.ToString() + " hours ago"; }
+                else if (span.Hours == 1 ) { return "An hour ago"; }
+                else if (span.Minutes > 1) { return span.Minutes.ToString() + " minutes ago"; }
+                else { return "Just now"; }
+            }
             else
             {
-                double exact_days = (DateTime.Today - date.Date).TotalDays;
-                int days = (int)Math.Floor(exact_days);
+                int days = Convert.ToInt32((DateTime.Today - date.Date).TotalDays);
                 if (days == 1) { return "Yesterday"; }
-                else if (Settings.Last_Played_Display_Level == 2 && days >= 30)
+                else if (days < 7) { return days.ToString() + " days ago"; }
+                else if (days >= 365)
                 {
-                    int months = (int)Math.Round(exact_days / 30.4375);
-                    if (months == 1) { return "1 month ago"; }
-                    else { return months.ToString() + " months ago"; }
+                    int years = days / 365;
+                    if (years == 1) { return "Over a year"; }
+                    else { return "Over " + years.ToString() + " years"; }
                 }
-                else if (Settings.Last_Played_Display_Level == 1 && days >= 7)
+                else if (days >= 30)
                 {
-                    int weeks = (int)Math.Round(exact_days / 7);
-                    if (weeks == 1) { return "1 week ago"; }
+                    int months = days / 30;
+                    if (months == 1) { return "A month ago"; }
+                    else { return "Over " + months.ToString() + " months"; }
+                }
+                else if (days >= 7)
+                {
+                    int weeks = days / 7;
+                    if (weeks == 1) { return "A week ago"; }
                     else { return weeks.ToString() + " weeks ago"; }
                 }
-                else { return days.ToString() + " days ago"; }
+                else { return null; }
             }
         }
 
@@ -496,7 +512,7 @@ namespace Game_Data
         {
             get
             {
-                if (_start_time == DateTime.MinValue || _end_time == DateTime.MinValue) { return TimeSpan.Zero; }
+                if (_start_time == DateTime.MaxValue || _end_time == DateTime.MinValue) { return TimeSpan.Zero; }
                 return _end_time.Subtract(_start_time);
             }
         }

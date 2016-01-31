@@ -31,8 +31,8 @@ namespace Game_Data
 
         private void SupportedGamesForm_Load(object sender, EventArgs e)
         {
-            WindowGeometry.GeometryFromString(Settings.SupportedGames_Window_Geometry, this);
-            supportedGamesList.RestoreState(Convert.FromBase64String(Settings.SupportedGamesList_State));
+            if (!String.IsNullOrEmpty(Settings.SupportedGames_Window_Geometry)) { WindowGeometry.GeometryFromString(Settings.SupportedGames_Window_Geometry, this); }
+            if (!String.IsNullOrEmpty(Settings.SupportedGamesList_State)) { supportedGamesList.RestoreState(Convert.FromBase64String(Settings.SupportedGamesList_State)); }
             //
             var parser = new FileIniDataParser();
             IniData ini = parser.ReadFile(Settings.Save_Path + "\\games.ini");
@@ -52,6 +52,10 @@ namespace Game_Data
 
         private void SupportedGamesForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (AddSupportedGameForm.isOpen)
+            {
+                addForm.Close();
+            }
             Settings.SupportedGames_Window_Geometry = WindowGeometry.GeometryToString(this);
             Settings.SupportedGamesList_State = Convert.ToBase64String(supportedGamesList.SaveState());
         }
@@ -63,7 +67,7 @@ namespace Game_Data
 
         private void removeButton_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to remove " + ((supportedGamesList.SelectedObjects.Count > 1) ? supportedGamesList.SelectedObjects.Count.ToString() + " games" : '"' + ((SupportedGame)supportedGamesList.SelectedObject).Game_Name + '"') + " from the supported games list?", "Remove Supported Game", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show("Are you sure you want to remove " + ((supportedGamesList.SelectedObjects.Count > 1) ? supportedGamesList.SelectedObjects.Count.ToString() + " games from the supported games list? This will also erase session data for these games." : '"' + ((SupportedGame)supportedGamesList.SelectedObject).Game_Name + '"' + " from the supported games list? This will also erase session data."), "Remove Supported Game" + ((supportedGamesList.SelectedObjects.Count > 1) ? "s" : ""), MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 var parser = new FileIniDataParser();
                 IniData ini = parser.ReadFile(Settings.Save_Path + "\\games.ini");
@@ -72,6 +76,7 @@ namespace Game_Data
                     supportedGamesList.RemoveObject(item);
                     ini.Sections.RemoveSection(item.ID);
                     GameWatcher.RemoveSupportedGame(item);
+                    GameDatabase.RemoveGame(item.ID);
                 }
                 parser.WriteFile(Settings.Save_Path + "\\games.ini", ini);
             }
@@ -122,10 +127,10 @@ namespace Game_Data
             {
                 supportedGamesList.RemoveObject(oGame);
                 supportedGamesList.AddObject(nGame);
-                ini[nGame.ID]["Process_Name"] = nGame.Process_Name;
-                ini[nGame.ID]["Game_Name"] = nGame.Game_Name;
                 if (nGame.Game_Name != oGame.Game_Name) { GameDatabase.RenameGame(oGame, nGame); }
                 GameWatcher.EditSupportedGame(oGame, nGame);
+                ini[nGame.ID]["Process_Name"] = nGame.Process_Name;
+                ini[nGame.ID]["Game_Name"] = nGame.Game_Name;
             }
             parser.WriteFile(Application.StartupPath + "\\games.ini", ini);
         }

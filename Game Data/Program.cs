@@ -1,20 +1,17 @@
-﻿using System;
+﻿using CrashReporterDotNET;
+using System;
 using System.Threading;
 using System.Windows.Forms;
-using CrashReporterDotNET;
 
 namespace Game_Data
 {
     static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
-            Application.ThreadException += ApplicationThreadException;
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            //Application.ThreadException += ApplicationThreadException;
+            //AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             //
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

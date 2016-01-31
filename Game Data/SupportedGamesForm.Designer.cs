@@ -47,10 +47,10 @@
             // addButton
             // 
             this.addButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.addButton.Location = new System.Drawing.Point(12, 347);
+            this.addButton.Location = new System.Drawing.Point(12, 340);
             this.addButton.Name = "addButton";
             this.addButton.Size = new System.Drawing.Size(75, 23);
-            this.addButton.TabIndex = 2;
+            this.addButton.TabIndex = 0;
             this.addButton.Text = "Add";
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.addButton_Click);
@@ -59,10 +59,10 @@
             // 
             this.removeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.removeButton.Enabled = false;
-            this.removeButton.Location = new System.Drawing.Point(174, 347);
+            this.removeButton.Location = new System.Drawing.Point(174, 340);
             this.removeButton.Name = "removeButton";
             this.removeButton.Size = new System.Drawing.Size(75, 23);
-            this.removeButton.TabIndex = 3;
+            this.removeButton.TabIndex = 2;
             this.removeButton.Text = "Remove";
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.removeButton_Click);
@@ -72,10 +72,10 @@
             this.editButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.editButton.Enabled = false;
             this.editButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.editButton.Location = new System.Drawing.Point(93, 347);
+            this.editButton.Location = new System.Drawing.Point(93, 340);
             this.editButton.Name = "editButton";
             this.editButton.Size = new System.Drawing.Size(75, 23);
-            this.editButton.TabIndex = 4;
+            this.editButton.TabIndex = 1;
             this.editButton.Text = "Edit";
             this.editButton.UseVisualStyleBackColor = true;
             this.editButton.Click += new System.EventHandler(this.editButton_Click);
@@ -97,10 +97,10 @@
             this.supportedGamesList.FullRowSelect = true;
             this.supportedGamesList.HighlightBackgroundColor = System.Drawing.Color.Empty;
             this.supportedGamesList.HighlightForegroundColor = System.Drawing.Color.Empty;
-            this.supportedGamesList.Location = new System.Drawing.Point(12, 12);
+            this.supportedGamesList.Location = new System.Drawing.Point(0, 0);
             this.supportedGamesList.Name = "supportedGamesList";
             this.supportedGamesList.ShowGroups = false;
-            this.supportedGamesList.Size = new System.Drawing.Size(356, 329);
+            this.supportedGamesList.Size = new System.Drawing.Size(389, 334);
             this.supportedGamesList.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.supportedGamesList.TabIndex = 5;
             this.supportedGamesList.UseCompatibleStateImageBehavior = false;
@@ -111,10 +111,11 @@
             // Game_Name
             // 
             this.Game_Name.AspectName = "Game_Name";
+            this.Game_Name.FillsFreeSpace = true;
             this.Game_Name.Hideable = false;
             this.Game_Name.MinimumWidth = 30;
             this.Game_Name.Text = "Game Name";
-            this.Game_Name.Width = 200;
+            this.Game_Name.Width = 225;
             // 
             // Process_Name
             // 
@@ -122,7 +123,7 @@
             this.Process_Name.Hideable = false;
             this.Process_Name.MinimumWidth = 30;
             this.Process_Name.Text = "Process Name";
-            this.Process_Name.Width = 150;
+            this.Process_Name.Width = 160;
             // 
             // supportedGamesMenu
             // 
@@ -160,12 +161,13 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(380, 379);
+            this.ClientSize = new System.Drawing.Size(388, 372);
             this.Controls.Add(this.supportedGamesList);
             this.Controls.Add(this.editButton);
             this.Controls.Add(this.removeButton);
             this.Controls.Add(this.addButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(280, 200);
             this.Name = "SupportedGamesForm";
             this.ShowIcon = false;
             this.Text = "Supported Games Editor";

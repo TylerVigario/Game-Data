@@ -49,11 +49,6 @@ namespace Game_Data
         public static void RemoveSupportedGame(SupportedGame nGame)
         {
             supportedGames.Remove(nGame);
-            Process[] procs = Process.GetProcessesByName(nGame.Process_Name);
-            if (procs.Length > 0)
-            {
-                gameClosed(nGame);
-            }
         }
 
         public static void EditSupportedGame(SupportedGame oGame, SupportedGame nGame)
@@ -62,12 +57,7 @@ namespace Game_Data
             supportedGames.Add(nGame);
             if (oGame.Process_Name != nGame.Process_Name)
             {
-                Process[] procs = Process.GetProcessesByName(oGame.Process_Name);
-                if (procs.Length > 0)
-                {
-                    gameClosed(oGame);
-                }
-                procs = Process.GetProcessesByName(nGame.Process_Name);
+                Process[] procs = Process.GetProcessesByName(nGame.Process_Name);
                 if (procs.Length > 0)
                 {
                     gameStarted(nGame, procs[0].StartTime);

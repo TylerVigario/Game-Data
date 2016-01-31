@@ -13,14 +13,22 @@ namespace Game_Data
 
         public static void load()
         {
+            var parser = new FileIniDataParser();
             if (!File.Exists(Application.StartupPath + "\\settings.ini"))
             {
-                File.Create(Application.StartupPath + "\\settings.ini");
+                ini = new IniData();
+                ini.Sections.AddSection("Settings");
+                ini["Settings"].AddKey("Version", "1");
+                ini["Settings"].AddKey("Start_Hidden", "0");
+                ini["Settings"].AddKey("Minimize_To_Tray", "1");
+                ini["Settings"].AddKey("Session_Threshold", "180");
+                ini["Settings"].AddKey("Exit_Confirmation", "1");
+                ini["Settings"].AddKey("Hide_Common_Processes", "1");
+                parser.WriteFile(Application.StartupPath + "\\settings.ini", ini);
             }
+            else { ini = parser.ReadFile(Application.StartupPath + "\\settings.ini"); }
             //
-            var parser = new FileIniDataParser();
-            ini = parser.ReadFile(Application.StartupPath + "\\settings.ini");
-            //
+            if (ini["Settings"]["Version"] != "1") { File.Delete(Application.StartupPath + "\\settings.ini"); load(); return; }
             flush = new Timer();
             flush.Interval = 30000;
             flush.Enabled = false;
@@ -42,9 +50,10 @@ namespace Game_Data
         public static void reset()
         {
             Start_Hidden = false;
-            Session_Threshold = 60;
-            Exit_Confrimation = true;
-            Close_To_Tray = true;
+            Minimize_To_Tray = true;
+            Session_Threshold = 180;
+            Exit_Confirmation = true;
+            Hide_Common_Processes = true;
         }
 
         public static string Save_Path
@@ -56,11 +65,7 @@ namespace Game_Data
         {
             get
             {
-                int sh = -1;
-                string temp = ini["Settings"]["Start_Hidden"];
-                if (!String.IsNullOrEmpty(temp)) { sh = int.Parse(temp); }
-                if (sh < 0) { sh = 0; }
-                return Convert.ToBoolean(sh);
+                return Convert.ToBoolean(Convert.ToInt32(ini["Settings"]["Start_Hidden"]));
             }
             set
             {
@@ -70,33 +75,25 @@ namespace Game_Data
             }
         }
 
-        public static bool Close_To_Tray
+        public static bool Minimize_To_Tray
         {
             get
             {
-                int ctt = -1;
-                string temp = ini["Settings"]["Close_To_Tray"];
-                if (!String.IsNullOrEmpty(temp)) { ctt = int.Parse(temp); }
-                if (ctt < 0) { ctt = 1; }
-                return Convert.ToBoolean(ctt);
+                return Convert.ToBoolean(Convert.ToInt32(ini["Settings"]["Minimize_To_Tray"]));
             }
             set
             {
-                ini["Settings"]["Close_To_Tray"] = Convert.ToInt32(value).ToString();
+                ini["Settings"]["Minimize_To_Tray"] = Convert.ToInt32(value).ToString();
                 flush.Enabled = true;
                 flush.Interval = 30000;
             }
         }
 
-        public static int Session_Threshold
+        public static double Session_Threshold
         {
             get
             {
-                int st = -1;
-                string temp = ini["Settings"]["Session_Threshold"];
-                if (!String.IsNullOrEmpty(temp)) { st = int.Parse(temp); }
-                if (st < 0) { st = 60; }
-                return st;
+                return double.Parse(ini["Settings"]["Session_Threshold"]);
             }
             set
             {
@@ -106,31 +103,41 @@ namespace Game_Data
             }
         }
 
-        public static bool Exit_Confrimation
+        public static bool Exit_Confirmation
         {
             get
             {
-                int ec = -1;
-                string temp = ini["Settings"]["Exit_Confrimation"];
-                if (!String.IsNullOrEmpty(temp)) { ec = int.Parse(temp); }
-                if (ec < 0) { ec = 1; }
-                return Convert.ToBoolean(ec);
+                return Convert.ToBoolean(Convert.ToInt32(ini["Settings"]["Exit_Confirmation"]));
             }
             set
             {
-                ini["Settings"]["Exit_Confrimation"] = Convert.ToInt32(value).ToString();
+                ini["Settings"]["Exit_Confirmation"] = Convert.ToInt32(value).ToString();
                 flush.Enabled = true;
                 flush.Interval = 30000;
             }
         }
 
+        public static bool Hide_Common_Processes
+        {
+            get
+            {
+                return Convert.ToBoolean(Convert.ToInt32(ini["Settings"]["Hide_Common_Processes"]));
+            }
+            set
+            {
+                ini["Settings"]["Hide_Common_Processes"] = Convert.ToInt32(value).ToString();
+                flush.Enabled = true;
+                flush.Interval = 30000;
+            }
+        }
+
+        #region Window Geometry
+
         public static string Main_Window_Geometry
         {
             get
             {
-                string temp = ini["Settings"]["Main_Window_Geometry"];
-                if (String.IsNullOrEmpty(temp)) { temp = ""; }
-                return temp;
+                return ini["Settings"]["Main_Window_Geometry"];
             }
             set
             {
@@ -140,17 +147,29 @@ namespace Game_Data
             }
         }
 
-        public static string GameStats_Window_Geometry
+        public static string Settings_Window_Geometry
         {
             get
             {
-                string temp = ini["Settings"]["GameStats_Window_Geometry"];
-                if (String.IsNullOrEmpty(temp)) { temp = ""; }
-                return temp;
+                return ini["Settings"]["Settings_Window_Geometry"];
             }
             set
             {
-                ini["Settings"]["GameStats_Window_Geometry"] = value;
+                ini["Settings"]["Settings_Window_Geometry"] = value;
+                flush.Enabled = true;
+                flush.Interval = 30000;
+            }
+        }
+
+        public static string WeeklyAverages_Window_Geometry
+        {
+            get
+            {
+                return ini["Settings"]["WeeklyAverages_Window_Geometry"];
+            }
+            set
+            {
+                ini["Settings"]["WeeklyAverages_Window_Geometry"] = value;
                 flush.Enabled = true;
                 flush.Interval = 30000;
             }
@@ -160,9 +179,7 @@ namespace Game_Data
         {
             get
             {
-                string temp = ini["Settings"]["SessionManager_Window_Geometry"];
-                if (String.IsNullOrEmpty(temp)) { temp = ""; }
-                return temp;
+                return ini["Settings"]["SessionManager_Window_Geometry"];
             }
             set
             {
@@ -172,13 +189,39 @@ namespace Game_Data
             }
         }
 
+        public static string AddSession_Window_Geometry
+        {
+            get
+            {
+                return ini["Settings"]["AddSession_Window_Geometry"];
+            }
+            set
+            {
+                ini["Settings"]["AddSession_Window_Geometry"] = value;
+                flush.Enabled = true;
+                flush.Interval = 30000;
+            }
+        }
+
+        public static string SessionsLength_Window_Geometry
+        {
+            get
+            {
+                return ini["Settings"]["SessionsLength_Window_Geometry"];
+            }
+            set
+            {
+                ini["Settings"]["SessionsLength_Window_Geometry"] = value;
+                flush.Enabled = true;
+                flush.Interval = 30000;
+            }
+        }
+
         public static string SupportedGames_Window_Geometry
         {
             get
             {
-                string temp = ini["Settings"]["SupportedGames_Window_Geometry"];
-                if (String.IsNullOrEmpty(temp)) { temp = ""; }
-                return temp;
+                return ini["Settings"]["SupportedGames_Window_Geometry"];
             }
             set
             {
@@ -188,13 +231,29 @@ namespace Game_Data
             }
         }
 
+        public static string AddSupportedGame_Window_Geometry
+        {
+            get
+            {
+                return ini["Settings"]["AddSupportedGame_Window_Geometry"];
+            }
+            set
+            {
+                ini["Settings"]["AddSupportedGame_Window_Geometry"] = value;
+                flush.Enabled = true;
+                flush.Interval = 30000;
+            }
+        }
+
+        #endregion
+
+        #region List State
+
         public static string GamesList_State
         {
             get
             {
-                string temp = ini["Settings"]["GamesList_State"];
-                if (String.IsNullOrEmpty(temp)) { temp = ""; }
-                return temp;
+                return ini["Settings"]["GamesList_State"];
             }
             set
             {
@@ -208,9 +267,7 @@ namespace Game_Data
         {
             get
             {
-                string temp = ini["Settings"]["SessionsList_State"];
-                if (String.IsNullOrEmpty(temp)) { temp = ""; }
-                return temp;
+                return ini["Settings"]["SessionsList_State"];
             }
             set
             {
@@ -224,9 +281,7 @@ namespace Game_Data
         {
             get
             {
-                string temp = ini["Settings"]["SupportedGamesList_State"];
-                if (String.IsNullOrEmpty(temp)) { temp = ""; }
-                return temp;
+                return ini["Settings"]["SupportedGamesList_State"];
             }
             set
             {
@@ -236,41 +291,6 @@ namespace Game_Data
             }
         }
 
-        public static int Time_Display_Level
-        {
-            get
-            {
-                int tdl = -1;
-                string temp = ini["Settings"]["Time_Display_Level"];
-                if (!String.IsNullOrEmpty(temp)) { tdl = int.Parse(temp); }
-                if (tdl < 0) { tdl = 3; }
-                return tdl;
-            }
-            set
-            {
-                ini["Settings"]["Time_Display_Level"] = value.ToString();
-                flush.Enabled = true;
-                flush.Interval = 30000;
-            }
-        }
-
-
-        public static int Last_Played_Display_Level
-        {
-            get
-            {
-                int lpdl = -1;
-                string temp = ini["Settings"]["Last_Played_Display_Level"];
-                if (!String.IsNullOrEmpty(temp)) { lpdl = int.Parse(temp); }
-                if (lpdl < 0) { lpdl = 2; }
-                return lpdl;
-            }
-            set
-            {
-                ini["Settings"]["Last_Played_Display_Level"] = value.ToString();
-                flush.Enabled = true;
-                flush.Interval = 30000;
-            }
-        }
+        #endregion
     }
 }

@@ -8,28 +8,21 @@ namespace Game_Data
 {
     public partial class WeeklyAveragesForm : Form
     {
-        private string game;
+        private GameData game;
 
         public WeeklyAveragesForm(GameData data)
         {
             InitializeComponent();
             //
-            game = data.ID;
+            game = data;
         }
 
-        public string Game_Loaded { get { return game; } }
-
-        private int GetWeekNumber(DateTime dtPassed)
-        {
-            CultureInfo ciCurr = CultureInfo.CurrentCulture;
-            int weekNum = ciCurr.Calendar.GetWeekOfYear(dtPassed, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-            return weekNum;
-        }
+        public string Game_ID { get { return game.ID; } }
 
         private void GameStatsForm_Load(object sender, System.EventArgs e)
         {
-            WindowGeometry.GeometryFromString(Settings.GameStats_Window_Geometry, this);
-            GameName.Text = game;
+            if (!String.IsNullOrEmpty(Settings.WeeklyAverages_Window_Geometry)) { WindowGeometry.GeometryFromString(Settings.WeeklyAverages_Window_Geometry, this); }
+            this.Text = game.Name + " - Weekly Averages";
             //
             new Thread(new ThreadStart(ThreadedLoad)).Start();
         }
@@ -40,9 +33,9 @@ namespace Game_Data
             double[] mod = new double[7];
             //
             List<int> weeksCounted = new List<int>();
-            foreach (SessionData sData in GameDatabase.LoadGameSessions(game))
+            foreach (SessionData sData in GameDatabase.LoadGameSessions(game.ID))
             {
-                int weekNumber = GetWeekNumber(sData.Start_Time);
+                int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(sData.Start_Time, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
                 if (!weeksCounted.Contains(weekNumber)) { weeksCounted.Add(weekNumber); }
                 switch (sData.Start_Time.DayOfWeek)
                 {
@@ -86,7 +79,7 @@ namespace Game_Data
 
         private void GameStatsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Settings.GameStats_Window_Geometry = WindowGeometry.GeometryToString(this);
+            Settings.WeeklyAverages_Window_Geometry = WindowGeometry.GeometryToString(this);
         }
     }
 }

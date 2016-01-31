@@ -31,7 +31,6 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.gameMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
@@ -44,9 +43,11 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.topMenu = new System.Windows.Forms.MenuStrip();
             this.reportsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.weeklyAveragesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sessionsLengthToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.counterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,7 +61,7 @@
             this.Maximum_Session_Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.Minimum_Session_Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.Average_Session_Time = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.listUpdate = new System.Windows.Forms.Timer(this.components);
             this.gameMenu.SuspendLayout();
             this.trayMenu.SuspendLayout();
             this.statusStrip.SuspendLayout();
@@ -71,22 +72,15 @@
             // gameMenu
             // 
             this.gameMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.infoToolStripMenuItem,
             this.sessionsToolStripMenuItem,
             this.removeToolStripMenuItem});
             this.gameMenu.Name = "gameMenu";
-            this.gameMenu.Size = new System.Drawing.Size(119, 70);
+            this.gameMenu.Size = new System.Drawing.Size(119, 48);
             this.gameMenu.Opening += new System.ComponentModel.CancelEventHandler(this.gameMenu_Opening);
-            // 
-            // infoToolStripMenuItem
-            // 
-            this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
-            this.infoToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
-            this.infoToolStripMenuItem.Text = "Info";
-            this.infoToolStripMenuItem.Click += new System.EventHandler(this.infoToolStripMenuItem_Click);
             // 
             // sessionsToolStripMenuItem
             // 
+            this.sessionsToolStripMenuItem.Enabled = false;
             this.sessionsToolStripMenuItem.Name = "sessionsToolStripMenuItem";
             this.sessionsToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.sessionsToolStripMenuItem.Text = "Sessions";
@@ -94,6 +88,7 @@
             // 
             // removeToolStripMenuItem
             // 
+            this.removeToolStripMenuItem.Enabled = false;
             this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
             this.removeToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.removeToolStripMenuItem.Text = "Remove";
@@ -146,9 +141,9 @@
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 275);
+            this.statusStrip.Location = new System.Drawing.Point(0, 200);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(526, 22);
+            this.statusStrip.Size = new System.Drawing.Size(536, 22);
             this.statusStrip.TabIndex = 1;
             this.statusStrip.Text = "statusStrip1";
             // 
@@ -165,40 +160,59 @@
             this.helpToolStripMenuItem});
             this.topMenu.Location = new System.Drawing.Point(0, 0);
             this.topMenu.Name = "topMenu";
-            this.topMenu.Size = new System.Drawing.Size(526, 24);
+            this.topMenu.Size = new System.Drawing.Size(536, 24);
             this.topMenu.TabIndex = 2;
             this.topMenu.Text = "menuStrip1";
             // 
             // reportsToolStripMenuItem
             // 
             this.reportsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.weeklyAveragesToolStripMenuItem});
+            this.infoToolStripMenuItem,
+            this.weeklyAveragesToolStripMenuItem,
+            this.sessionsLengthToolStripMenuItem});
             this.reportsToolStripMenuItem.Name = "reportsToolStripMenuItem";
             this.reportsToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
             this.reportsToolStripMenuItem.Text = "Reports";
             // 
+            // infoToolStripMenuItem
+            // 
+            this.infoToolStripMenuItem.Enabled = false;
+            this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
+            this.infoToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.infoToolStripMenuItem.Text = "Game Info";
+            this.infoToolStripMenuItem.Visible = false;
+            this.infoToolStripMenuItem.Click += new System.EventHandler(this.infoToolStripMenuItem_Click);
+            // 
             // weeklyAveragesToolStripMenuItem
             // 
+            this.weeklyAveragesToolStripMenuItem.Enabled = false;
             this.weeklyAveragesToolStripMenuItem.Name = "weeklyAveragesToolStripMenuItem";
             this.weeklyAveragesToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.weeklyAveragesToolStripMenuItem.Text = "Weekly Averages";
             this.weeklyAveragesToolStripMenuItem.Click += new System.EventHandler(this.statsToolStripMenuItem_Click);
             // 
+            // sessionsLengthToolStripMenuItem
+            // 
+            this.sessionsLengthToolStripMenuItem.Enabled = false;
+            this.sessionsLengthToolStripMenuItem.Name = "sessionsLengthToolStripMenuItem";
+            this.sessionsLengthToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.sessionsLengthToolStripMenuItem.Text = "Sessions Length";
+            this.sessionsLengthToolStripMenuItem.Click += new System.EventHandler(this.sessionsLengthToolStripMenuItem_Click);
+            // 
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.counterToolStripMenuItem,
             this.toolStripMenuItem1});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
             // 
-            // counterToolStripMenuItem
+            // toolStripMenuItem1
             // 
-            this.counterToolStripMenuItem.Name = "counterToolStripMenuItem";
-            this.counterToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
-            this.counterToolStripMenuItem.Text = "Counter";
-            this.counterToolStripMenuItem.Click += new System.EventHandler(this.counterToolStripMenuItem_Click);
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(168, 22);
+            this.toolStripMenuItem1.Text = "Supported Games";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.supportedGamesToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -212,14 +226,14 @@
             // settingsToolStripMenuItem2
             // 
             this.settingsToolStripMenuItem2.Name = "settingsToolStripMenuItem2";
-            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem2.Size = new System.Drawing.Size(116, 22);
             this.settingsToolStripMenuItem2.Text = "Settings";
             this.settingsToolStripMenuItem2.Click += new System.EventHandler(this.allSettingsToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -257,7 +271,7 @@
             this.gamesList.MultiSelect = false;
             this.gamesList.Name = "gamesList";
             this.gamesList.ShowGroups = false;
-            this.gamesList.Size = new System.Drawing.Size(526, 251);
+            this.gamesList.Size = new System.Drawing.Size(536, 176);
             this.gamesList.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.gamesList.TabIndex = 3;
             this.gamesList.UseCompatibleStateImageBehavior = false;
@@ -273,7 +287,7 @@
             this.GameName.MinimumWidth = 30;
             this.GameName.Text = "Name";
             this.GameName.ToolTipText = "Name";
-            this.GameName.Width = 150;
+            this.GameName.Width = 225;
             // 
             // Last_Played
             // 
@@ -294,7 +308,7 @@
             this.Sessions.Text = "Sessions";
             this.Sessions.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Sessions.ToolTipText = "Number of Sessions";
-            this.Sessions.Width = 44;
+            this.Sessions.Width = 40;
             // 
             // Total_Time
             // 
@@ -304,7 +318,7 @@
             this.Total_Time.Text = "Total";
             this.Total_Time.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Total_Time.ToolTipText = "Total Total";
-            this.Total_Time.Width = 110;
+            this.Total_Time.Width = 75;
             // 
             // Last_Session_Time
             // 
@@ -314,7 +328,7 @@
             this.Last_Session_Time.Text = "Last Session";
             this.Last_Session_Time.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Last_Session_Time.ToolTipText = "Last Session Time";
-            this.Last_Session_Time.Width = 89;
+            this.Last_Session_Time.Width = 75;
             // 
             // Maximum_Session_Time
             // 
@@ -326,7 +340,7 @@
             this.Maximum_Session_Time.Text = "Maximum Session";
             this.Maximum_Session_Time.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Maximum_Session_Time.ToolTipText = "Maximum Session Time";
-            this.Maximum_Session_Time.Width = 110;
+            this.Maximum_Session_Time.Width = 75;
             // 
             // Minimum_Session_Time
             // 
@@ -338,7 +352,7 @@
             this.Minimum_Session_Time.Text = "Minimum Session";
             this.Minimum_Session_Time.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Minimum_Session_Time.ToolTipText = "Minimum Session Time";
-            this.Minimum_Session_Time.Width = 110;
+            this.Minimum_Session_Time.Width = 75;
             // 
             // Average_Session_Time
             // 
@@ -350,26 +364,25 @@
             this.Average_Session_Time.Text = "Average Session";
             this.Average_Session_Time.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.Average_Session_Time.ToolTipText = "Average Session Time";
-            this.Average_Session_Time.Width = 110;
+            this.Average_Session_Time.Width = 75;
             // 
-            // toolStripMenuItem1
+            // listUpdate
             // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(168, 22);
-            this.toolStripMenuItem1.Text = "Supported Games";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.supportedGamesToolStripMenuItem_Click);
+            this.listUpdate.Interval = 60000;
+            this.listUpdate.Tick += new System.EventHandler(this.listUpdate_Tick);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(526, 297);
+            this.ClientSize = new System.Drawing.Size(536, 222);
             this.Controls.Add(this.gamesList);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.topMenu);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.topMenu;
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(300, 220);
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.Text = "Game Data";
@@ -413,14 +426,15 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem sessionsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem infoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reportsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem counterToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem weeklyAveragesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem infoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sessionsLengthToolStripMenuItem;
+        private System.Windows.Forms.Timer listUpdate;
     }
 }
 
