@@ -101,8 +101,20 @@ namespace Game_Data
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
-            { 
-                closeGD();
+            {
+                if (!Settings.Exit_Confirmation || MessageBox.Show("Are you sure you want to exit Game Data?", "Game Data", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    Settings.Main_Window_Geometry = WindowGeometry.GeometryToString(this);
+                    Settings.GamesList_State = Convert.ToBase64String(gamesList.SaveState());
+                    Settings.Dispose();
+                    GameDatabase.Dispose();
+                    appMutex.WaitOne();
+                    appMutex.ReleaseMutex();
+                    appMutex.Dispose();
+                    trayIcon.Dispose();
+                    Environment.Exit(0);
+                }
+                else { e.Cancel = true; }
             }
         }
 
@@ -116,22 +128,6 @@ namespace Game_Data
                     this.ShowInTaskbar = false;
                     trayIcon.Visible = true;
                 }
-            }
-        }
-
-        private void closeGD()
-        {
-            if (!Settings.Exit_Confirmation || (MessageBox.Show("Are you sure you want to exit Game Data?", "Game Data", MessageBoxButtons.YesNo) == DialogResult.Yes))
-            {
-                Settings.Main_Window_Geometry = WindowGeometry.GeometryToString(this);
-                Settings.GamesList_State = Convert.ToBase64String(gamesList.SaveState());
-                Settings.Dispose();
-                GameDatabase.Dispose();
-                appMutex.WaitOne();
-                appMutex.ReleaseMutex();
-                appMutex.Dispose();
-                trayIcon.Dispose();
-                Environment.Exit(0);
             }
         }
 
@@ -158,7 +154,7 @@ namespace Game_Data
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            closeGD();
+            MainForm_FormClosing(this, new FormClosingEventArgs(CloseReason.UserClosing, false));
         }
 
         private void settingsToolStripMenuItem1_Click(object sender, EventArgs e)
