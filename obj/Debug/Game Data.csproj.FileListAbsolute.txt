@@ -1,0 +1,34 @@
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\Game Data.exe.config
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\Game Data.exe
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\Game Data.pdb
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\CrashReporter.NET.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\INIFileParser.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\ObjectListView.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\CrashReporter.NET.pdb
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\CrashReporter.NET.xml
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\INIFileParser.xml
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\ObjectListView.xml
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\da\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\de\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\es\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\fr\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\it\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\nl\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\pl\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\ru\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\bin\Debug\sv\CrashReporter.NET.resources.dll
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.AboutForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.AddSessionForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.AddSupportedGameForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.GameInfoForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.SessionsLengthForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.WeeklyAveragesForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.MainForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.Properties.Resources.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.SessionManagerForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.SettingsForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game_Data.SupportedGamesForm.resources
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game Data.csproj.GenerateResource.Cache
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game Data.exe
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game Data.pdb
+D:\Documents\Visual Studio 2012\Projects\game-data\Game Data\obj\Debug\Game Data.csprojResolveAssemblyReference.cache
